@@ -41,11 +41,14 @@ final class LedgerUi {
     void renderFeed(){
         a.feed.removeAllViews();importStatus=null;List<LedgerEntry> records=db.month(month.toString());List<LedgerEntry> drafts=db.list(true);
         LinearLayout section=a.column();a.pad(section,20,10,20,20);a.feed.addView(section);
-        LinearLayout dateRow=a.row();section.addView(dateRow,lp(-1,44));
-        TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),17,a.BLACK,true);title.setGravity(Gravity.CENTER_VERTICAL);title.setCompoundDrawablesRelative(null,null,UiKit.drawable(a,R.drawable.ic_ui_down,15,a.GRAY),null);title.setCompoundDrawablePadding(a.dp(8));title.setBackground(UiKit.surface(a,a.WHITE,12,0));dateRow.addView(title,lp(-2,44));title.setOnClickListener(v->chooseMonth());
-        dateRow.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));
+        LinearLayout dateRow=a.row();section.addView(dateRow,lp(-1,48));
+        LinearLayout monthControl=a.row();a.pad(monthControl,12,0,10,0);monthControl.setBackground(UiKit.glass(a,24,false));
+        LinearLayout.LayoutParams monthp=new LinearLayout.LayoutParams(0,a.dp(48),1);monthp.rightMargin=a.dp(8);dateRow.addView(monthControl,monthp);
+        TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),17,a.BLACK,true);title.setGravity(Gravity.CENTER_VERTICAL);title.setSingleLine(true);title.setMinWidth(0);title.setAutoSizeTextTypeUniformWithConfiguration(12,17,1,android.util.TypedValue.COMPLEX_UNIT_SP);
+        monthControl.addView(title,new LinearLayout.LayoutParams(0,-1,1));ImageView down=UiKit.icon(a,R.drawable.ic_ui_down,14,a.GRAY);LinearLayout.LayoutParams downp=lp(18,18);downp.leftMargin=a.dp(6);monthControl.addView(down,downp);
+        monthControl.setFocusable(true);monthControl.setContentDescription(title.getText()+"，选择账单月份");UiKit.buttonSemantics(monthControl);monthControl.setOnClickListener(v->chooseMonth());
         TextView prev=UiKit.iconButton(a,R.drawable.ic_ui_back,"上个月"),next=UiKit.iconButton(a,R.drawable.ic_ui_chevron,"下个月");
-        for(TextView b:new TextView[]{prev,next}){b.setBackground(UiKit.surface(a,a.WHITE,22,0));dateRow.addView(b,lp(44,44));}
+        for(TextView b:new TextView[]{prev,next}){b.setBackground(UiKit.surface(a,android.graphics.Color.TRANSPARENT,22,0));dateRow.addView(b,lp(44,48));}
         prev.setOnClickListener(v->{month=month.minusMonths(1);a.render();});next.setOnClickListener(v->{month=month.plusMonths(1);a.render();});
         paragraph(section,"净支出",12,a.GRAY,false,10);
         TextView total=a.text(money(LedgerRules.netExpense(records)),28,a.BLACK,true);total.setMaxLines(1);total.setAutoSizeTextTypeUniformWithConfiguration(18,28,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams totalp=lp(-1,48);section.addView(total,totalp);
