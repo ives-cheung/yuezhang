@@ -30,7 +30,7 @@ final class UiKit {
     }
     static Drawable inputBackground(MainActivity a){
         StateListDrawable states=new StateListDrawable();
-        GradientDrawable focused=a.bg(0xfff1faf8,14);focused.setStroke(a.dp(1.5f),ACCENT);
+        GradientDrawable focused=a.bg(TINT,12);focused.setStroke(a.dp(1.5f),ACCENT);
         GradientDrawable normal=a.bg(a.SURFACE,12);
         states.addState(new int[]{android.R.attr.state_focused},focused);
         states.addState(new int[]{},normal);return states;
@@ -85,13 +85,13 @@ final class UiKit {
         button.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         button.setContentDescription(description);button.setFocusable(true);button.setClickable(true);
         button.setMinimumWidth(a.dp(48));button.setMinimumHeight(a.dp(48));
-        button.setBackground(surface(a,destructive?0xfffceeee:a.WHITE,14,destructive?0xfff4dada:a.LINE));
+        button.setBackground(surface(a,destructive?0xfffceeee:TINT,12,0));
         buttonSemantics(button);return button;
     }
     static void picker(MainActivity a,TextView t,int leading){
         t.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);a.pad(t,15,0,15,0);
         t.setCompoundDrawablesRelative(leading==0?null:drawable(a,leading,20,ACCENT),null,drawable(a,R.drawable.ic_ui_chevron,18,a.GRAY),null);
-        t.setCompoundDrawablePadding(a.dp(10));t.setBackground(surface(a,a.SURFACE,14,a.LINE));
+        t.setCompoundDrawablePadding(a.dp(10));t.setBackground(surface(a,a.SURFACE,12,0));
         t.setFocusable(true);buttonSemantics(t);
     }
     interface Choice { void selected(int index); }

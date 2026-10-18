@@ -40,7 +40,7 @@ final class LedgerUi {
     void monitor(){stop();if(ScreenshotImporter.running){ticker=new Runnable(){public void run(){if(a.isDestroyed()||a.isFinishing())return;if(!ScreenshotImporter.running){if(a.dailyMode)a.render();return;}if(importStatus!=null)importStatus.setText("  "+ScreenshotImporter.status);handler.postDelayed(this,1200);}};handler.postDelayed(ticker,1200);}}
     void renderFeed(){
         a.feed.removeAllViews();importStatus=null;List<LedgerEntry> records=db.month(month.toString());List<LedgerEntry> drafts=db.list(true);
-        LinearLayout section=a.column();a.pad(section,20,0,20,20);a.feed.addView(section);
+        LinearLayout section=a.column();a.pad(section,20,10,20,20);a.feed.addView(section);
         LinearLayout dateRow=a.row();section.addView(dateRow,lp(-1,44));
         TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),17,a.BLACK,true);title.setGravity(Gravity.CENTER_VERTICAL);title.setCompoundDrawablesRelative(null,null,UiKit.drawable(a,R.drawable.ic_ui_down,15,a.GRAY),null);title.setCompoundDrawablePadding(a.dp(8));title.setBackground(UiKit.surface(a,a.WHITE,12,0));dateRow.addView(title,lp(-2,44));title.setOnClickListener(v->chooseMonth());
         dateRow.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));
@@ -51,13 +51,13 @@ final class LedgerUi {
         TextView total=a.text(money(LedgerRules.netExpense(records)),28,a.BLACK,true);total.setMaxLines(1);total.setAutoSizeTextTypeUniformWithConfiguration(18,28,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams totalp=lp(-1,48);section.addView(total,totalp);
         long income=0,refund=0;for(LedgerEntry e:records){if(e.type.equals(LedgerEntry.INCOME))income+=e.cents;if(e.type.equals(LedgerEntry.REFUND))refund+=e.cents;}
         TextView stats=a.text("收入 "+money(income)+"   ·   退款 "+money(refund),12,a.GRAY,false);section.addView(stats,lp(-1,-2));
-        LinearLayout tools=a.row();tools.setBackground(a.bg(a.SURFACE,14));LinearLayout.LayoutParams toolp=lp(-1,44);toolp.topMargin=a.dp(18);section.addView(tools,toolp);
+        LinearLayout tools=a.row();tools.setBackground(a.bg(a.WHITE,14));LinearLayout.LayoutParams toolp=lp(-1,44);toolp.topMargin=a.dp(18);section.addView(tools,toolp);
         LinearLayout image=compactShortcut(R.drawable.ic_ui_scan,"截图导入"),text=compactShortcut(R.drawable.ic_ui_quick,"文字快记");tools.addView(image,new LinearLayout.LayoutParams(0,-1,1));View split=new View(a);split.setBackgroundColor(a.LINE);tools.addView(split,lp(1,18));tools.addView(text,new LinearLayout.LayoutParams(0,-1,1));image.setOnClickListener(v->importOptions());text.setOnClickListener(v->quickEntry());
         if(ScreenshotImporter.running){LinearLayout busy=a.row();space(section,12);section.addView(busy,lp(-1,36));ProgressBar progress=new ProgressBar(a);busy.addView(progress,lp(18,18));TextView message=a.text("  "+ScreenshotImporter.status,12,a.GRAY,false);busy.addView(message,new LinearLayout.LayoutParams(0,-2,1));importStatus=message;}
         if(!drafts.isEmpty()){
             LinearLayout pending=a.row();a.pad(pending,0,0,0,0);pending.setBackground(UiKit.surface(a,a.WHITE,12,0));LinearLayout.LayoutParams pp=lp(-1,44);pp.topMargin=a.dp(6);section.addView(pending,pp);pending.addView(UiKit.icon(a,R.drawable.ic_ui_checklist,18,a.BLUE),lp(22,22));TextView label=a.text("待核对 "+drafts.size()+" 笔",13,a.BLUE,true);LinearLayout.LayoutParams labelp=new LinearLayout.LayoutParams(0,-2,1);labelp.leftMargin=a.dp(8);pending.addView(label,labelp);pending.addView(UiKit.icon(a,R.drawable.ic_ui_chevron,16,a.GRAY),lp(22,22));pending.setOnClickListener(v->review());
         }
-        space(section,18);section.addView(a.divider());
+        space(section,14);
         LinearLayout head=a.row();LinearLayout.LayoutParams headp=lp(-1,52);headp.topMargin=a.dp(6);section.addView(head,headp);head.addView(a.text("日常流水",17,a.BLACK,true));TextView count=a.text(records.size()+" 笔",12,a.GRAY,false);LinearLayout.LayoutParams countp=new LinearLayout.LayoutParams(0,-2,1);countp.leftMargin=a.dp(10);head.addView(count,countp);
         ImageView calendar=UiKit.iconAction(a,R.drawable.ic_ui_calendar,"查看收支日历",false);calendar.setBackground(UiKit.surface(a,a.WHITE,22,0));head.addView(calendar,lp(48,48));calendar.setOnClickListener(v->new FlowCalendar(this).show());
         if(records.isEmpty()){
@@ -66,8 +66,8 @@ final class LedgerUi {
             String date="";LinearLayout group=null;
             for(LedgerEntry e:records){if(!e.date.equals(date)){
                 date=e.date;LocalDate d=LocalDate.parse(date);String label=d.equals(LocalDate.now())?"今天":d.format(DateTimeFormatter.ofPattern("M月d日 EEEE",Locale.CHINA));
-                paragraph(section,label,12,a.GRAY,false,16);group=a.column();space(section,2);section.addView(group,lp(-1,-2));
-            }addEntryRow(group,e);group.addView(a.divider());}
+                paragraph(section,label,12,a.GRAY,false,16);group=a.groupedList();space(section,8);section.addView(group,lp(-1,-2));
+            }else group.addView(a.insetDivider());addEntryRow(group,e);}
         }
         monitor();
     }
@@ -80,8 +80,8 @@ final class LedgerUi {
         LinearLayout r=a.row();a.pad(r,0,12,0,12);parent.addView(r,lp(-1,-2));r.addView(a.sourceIcon(e.title,e.category,loanBrand(e),34),lp(34,34));
         LinearLayout info=a.column();LinearLayout.LayoutParams ip=new LinearLayout.LayoutParams(0,-2,1);ip.leftMargin=a.dp(12);r.addView(info,ip);TextView name=a.text(e.title,14,a.BLACK,false);name.setMaxLines(2);info.addView(name);
         String meta=e.category+(e.time.isEmpty()?"":" · "+e.time);paragraph(info,meta,11,a.GRAY,false,4);
-        LinearLayout amounts=a.column();amounts.setGravity(Gravity.RIGHT);LinearLayout.LayoutParams am=lp(-2,-2);am.leftMargin=a.dp(8);r.addView(amounts,am);
-        amounts.addView(a.text((e.type.equals(LedgerEntry.EXPENSE)?"−":e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?"+":"")+money(e.cents),15,e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?0xff21805b:a.BLACK,true));
+        LinearLayout amounts=a.column();amounts.setGravity(Gravity.RIGHT);LinearLayout.LayoutParams am=lp(-2,-2);am.leftMargin=a.dp(12);r.addView(amounts,am);
+        TextView amount=a.text((e.type.equals(LedgerEntry.EXPENSE)?"−":e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?"+":"")+money(e.cents),15,e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?0xff21805b:a.BLACK,true);amount.setSingleLine(true);amount.setMaxWidth(a.dp(146));amount.setAutoSizeTextTypeUniformWithConfiguration(10,15,1,android.util.TypedValue.COMPLEX_UNIT_SP);amounts.addView(amount);
         if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,a.WHITE,14,0));r.setOnClickListener(v->open.run());
     }
     void label(LinearLayout p,String s){paragraph(p,s,13,a.GRAY,true,18);}
@@ -91,8 +91,8 @@ final class LedgerUi {
         final Dialog dialog;final LinearLayout page,body,footer;final ScrollView scroll;final TextView heading;
         Page(String title){
             dialog=new Dialog(a,R.style.MoneyThemeLight);page=a.column();page.setBackgroundColor(a.WHITE);
-            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->close());heading=a.text(title,17,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);page.addView(a.divider());
-            scroll=new ScrollView(a);scroll.setFillViewport(false);body=a.column();a.pad(body,20,8,20,24);scroll.addView(body);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));footer=a.column();a.pad(footer,20,12,20,12);page.addView(a.divider());page.addView(footer);
+            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->close());heading=a.text(title,17,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);
+            scroll=new ScrollView(a);scroll.setFillViewport(false);body=a.column();a.pad(body,20,8,20,24);scroll.addView(body);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));footer=a.column();a.pad(footer,20,12,20,12);page.addView(footer);
         }
         void button(String label,Runnable action){TextView b=a.primaryButton(label);footer.addView(b,lp(-1,52));b.setOnClickListener(v->action.run());}
         void replaceContent(String title){heading.setText(title);body.removeAllViews();footer.removeAllViews();scroll.scrollTo(0,0);}

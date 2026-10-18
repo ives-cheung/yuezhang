@@ -83,7 +83,7 @@ public class MainActivity extends Activity {
         TextView daily=tab("日常记账",dailyMode), subscriptions=tab("订阅支出",!dailyMode&&!walletMode), balances=tab("钱包余额",!dailyMode&&walletMode);
         for(TextView t:new TextView[]{daily,subscriptions,balances}){LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,dp(44),1);tp.setMargins(dp(1),0,dp(1),0);tabs.addView(t,tp);}
         daily.setOnClickListener(v->{dailyMode=true;walletMode=false;render();});subscriptions.setOnClickListener(v->{dailyMode=false;walletMode=false;ledger.stop();render();});balances.setOnClickListener(v->{dailyMode=false;walletMode=true;ledger.stop();render();});root.addView(tabWrap);
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);feed=column();scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);feed=column();feed.setBackgroundColor(SURFACE);scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         if(dailyMode)ledger.renderFeed();else if(walletMode)renderWalletFeed();else renderFeed();
         LinearLayout bottom=column();bottom.setBackgroundColor(WHITE);pad(bottom,20,8,20,10);View line=new View(this);line.setBackgroundColor(LINE);
         TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(48));ap.topMargin=0;bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
@@ -96,8 +96,10 @@ public class MainActivity extends Activity {
     TextView primaryButton(String label){return UiKit.button(this,label,true);}
     View divider(){View v=new View(this);v.setBackgroundColor(LINE);v.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(1)));return v;}
 
+    LinearLayout groupedList(){LinearLayout list=column();pad(list,14,0,14,0);list.setBackground(bg(WHITE,18));list.setClipToOutline(true);return list;}
+    View insetDivider(){View v=new View(this);v.setBackgroundColor(LINE);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,Math.max(1,dp(.5f)));p.leftMargin=dp(46);v.setLayoutParams(p);return v;}
     LinearLayout summary(String label,String value,String detail){
-        LinearLayout panel=column();pad(panel,20,10,20,20);feed.addView(panel);
+        LinearLayout panel=column();pad(panel,24,18,24,24);feed.addView(panel);
         panel.addView(text(label,12,GRAY,false));TextView amount=text(value,28,BLACK,true);amount.setMaxLines(1);amount.setAutoSizeTextTypeUniformWithConfiguration(18,28,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(44));ap.topMargin=dp(2);panel.addView(amount,ap);
         if(!detail.isEmpty())panel.addView(text(detail,12,GRAY,false));return panel;
     }
@@ -105,7 +107,7 @@ public class MainActivity extends Activity {
         feed.removeAllViews();summary("钱包总余额",money.format(walletTotal()),wallets.size()+" 个账户");
         LinearLayout section=column();pad(section,20,0,20,20);feed.addView(section);section.addView(text("余额账户",17,BLACK,true));
         if(wallets.isEmpty()){TextView empty=text("暂无余额账户",14,GRAY,false);empty.setGravity(Gravity.CENTER);section.addView(empty,new LinearLayout.LayoutParams(-1,dp(90)));empty.setOnClickListener(v->walletForm(null,-1));}
-        else{LinearLayout list=column();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<wallets.size();i++){addWallet(wallets.get(i),i,list);if(i<wallets.size()-1)list.addView(divider());}}
+        else{LinearLayout list=groupedList();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<wallets.size();i++){addWallet(wallets.get(i),i,list);if(i<wallets.size()-1)list.addView(insetDivider());}}
         renderReceivables(section);
     }
     double walletTotal(){double total=0;for(Wallet w:wallets)total+=w.balance;return total;}
@@ -129,7 +131,7 @@ public class MainActivity extends Activity {
         LinearLayout heading=row();LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(-1,dp(44));hp.topMargin=dp(22);section.addView(heading,hp);heading.addView(text("应收账款",17,BLACK,true));View gap=new View(this);heading.addView(gap,new LinearLayout.LayoutParams(0,1,1));ImageView add=UiKit.iconAction(this,R.drawable.ic_ui_plus,"添加应收账款",false);add.setBackground(UiKit.surface(this,WHITE,22,0));heading.addView(add,new LinearLayout.LayoutParams(dp(44),dp(44)));add.setOnClickListener(v->receivableForm(null,-1));
         section.addView(text("待收回  "+money.format(receivableTotal()),12,GRAY,false));
         if(receivables.isEmpty()){TextView empty=text("暂无应收账款",14,GRAY,false);empty.setGravity(Gravity.CENTER);section.addView(empty,new LinearLayout.LayoutParams(-1,dp(76)));empty.setOnClickListener(v->receivableForm(null,-1));}
-        else{LinearLayout list=column();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<receivables.size();i++){addReceivable(receivables.get(i),i,list);if(i<receivables.size()-1)list.addView(divider());}}
+        else{LinearLayout list=groupedList();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<receivables.size();i++){addReceivable(receivables.get(i),i,list);if(i<receivables.size()-1)list.addView(insetDivider());}}
     }
     double receivableTotal(){double total=0;for(Receivable r:receivables)if(!r.settled)total+=r.amount;return total;}
     void addReceivable(Receivable record,int index,LinearLayout parent){
@@ -174,20 +176,20 @@ public class MainActivity extends Activity {
     void loadReceivables(){try{JSONArray a=new JSONArray(getSharedPreferences("receivables",MODE_PRIVATE).getString("records","[]"));for(int i=0;i<a.length();i++){JSONObject o=a.getJSONObject(i);String image=o.optString("imagePath","");receivables.add(new Receivable(o.getString("note"),o.getDouble("amount"),LocalDate.parse(o.getString("date")),image.isEmpty()?null:image,o.optBoolean("settled",false)));}}catch(Exception ignored){}}
 
     void renderFeed(){
-        feed.removeAllViews();LocalDate today=LocalDate.now();summary("每月预计支出",money.format(monthlyTotal()),items.size()+" 项订阅 · 含半年付 / 年付月均");
+        feed.removeAllViews();LocalDate today=LocalDate.now();summary("每月预计支出",money.format(monthlyTotal()),items.size()+" 项订阅");
         LinearLayout section=column();pad(section,20,0,20,20);feed.addView(section);
         ArrayList<Sub> upcoming=new ArrayList<>();for(Sub item:items){long days=ChronoUnit.DAYS.between(today,nextDue(item,today));if(days>=0&&days<=7)upcoming.add(item);}upcoming.sort(Comparator.comparing(item->nextDue(item,today)));
         if(!upcoming.isEmpty()){section.addView(text("7 天内扣费",15,BLACK,true));for(Sub item:upcoming)addDueCard(item,nextDue(item,today),today,section);View gap=new View(this);section.addView(gap,new LinearLayout.LayoutParams(1,dp(22)));}
         LinearLayout heading=row();section.addView(heading);heading.addView(text("我的订阅",17,BLACK,true));TextView count=text(items.size()+" 项",12,GRAY,false);count.setGravity(Gravity.END);heading.addView(count,new LinearLayout.LayoutParams(0,-2,1));
         if(items.isEmpty()){TextView empty=text("暂无订阅",14,GRAY,false);empty.setGravity(Gravity.CENTER);section.addView(empty,new LinearLayout.LayoutParams(-1,dp(96)));empty.setOnClickListener(v->form(null,-1));}
-        else{LinearLayout list=column();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<items.size();i++){addSubscription(items.get(i),i,list);if(i<items.size()-1)list.addView(divider());}}
+        else{LinearLayout list=groupedList();LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(8);section.addView(list,lp);for(int i=0;i<items.size();i++){addSubscription(items.get(i),i,list);if(i<items.size()-1)list.addView(insetDivider());}}
     }
     double monthlyTotal(){double x=0;for(Sub s:items)x+=s.monthly();return x;}
     LocalDate nextDue(Sub s,LocalDate today){LocalDate start=s.start();int interval=s.cycle.equals("年付")?12:s.cycle.equals("半年付")?6:1;if(!start.isBefore(today))return start;long elapsed=ChronoUnit.MONTHS.between(YearMonth.from(start),YearMonth.from(today));long periods=Math.max(0,elapsed/interval);LocalDate candidate=safeMonth(start,start.plusMonths(periods*interval).getYear(),start.plusMonths(periods*interval).getMonthValue());if(candidate.isBefore(today)){LocalDate next=start.plusMonths((periods+1)*interval);candidate=safeMonth(start,next.getYear(),next.getMonthValue());}return candidate;}
     LocalDate safeMonth(LocalDate anchor,int year,int month){YearMonth ym=YearMonth.of(year,month);return ym.atDay(Math.min(anchor.getDayOfMonth(),ym.lengthOfMonth()));}
     LocalDate safeYear(LocalDate anchor,long years){LocalDate y=anchor.plusYears(years);return y.withDayOfMonth(Math.min(anchor.getDayOfMonth(),y.lengthOfMonth()));}
     void addDueCard(Sub sub,LocalDate due,LocalDate today,LinearLayout parent){
-        LinearLayout line=row();pad(line,12,10,12,10);line.setBackground(UiKit.surface(this,SURFACE,14,0));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(8);parent.addView(line,p);
+        LinearLayout line=row();pad(line,12,10,12,10);line.setBackground(UiKit.surface(this,WHITE,14,0));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(8);parent.addView(line,p);
         long days=ChronoUnit.DAYS.between(today,due);TextView when=text(days==0?"今天":days+" 天",12,days==0?UiKit.DANGER:BLUE,true);line.addView(when,new LinearLayout.LayoutParams(dp(42),-2));TextView name=oneLine(sub.name,14,BLACK,false);LinearLayout.LayoutParams np=new LinearLayout.LayoutParams(0,-2,1);np.rightMargin=dp(10);line.addView(name,np);line.addView(oneLine(money.format(sub.amount),14,BLACK,true));line.setOnClickListener(v->form(sub,items.indexOf(sub)));
     }
     void addSubscription(Sub sub,int index,LinearLayout parent){
