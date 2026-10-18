@@ -1,0 +1,30 @@
+# Build outputs and local IDE state
+.gradle/
+.gradle-user/
+**/build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+
+# Local signing material and environment settings
+*.jks
+*.keystore
+*.p12
+*.pem
+.env
+.env.*
+
+# Device data backups and local delivery files
+.local-backups/
+artifacts/
+*.apk
+*.aab
+*.tar
+*.db
+*.db-shm
+*.db-wal
+
+# Working logo alternatives; selected artwork is in docs/
+/design/
