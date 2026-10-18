@@ -38,16 +38,19 @@ final class FluidTabs extends LinearLayout {
     private void updateLabels(){
         for(int i=0;i<getChildCount();i++){TextView t=(TextView)getChildAt(i);boolean active=i==selected;
             t.setSelected(active);t.setTextColor(active?a.BLACK:a.GRAY);
-            t.setTypeface(android.graphics.Typeface.create(active?"sans-serif-medium":"sans-serif",android.graphics.Typeface.NORMAL));}
+            t.setTypeface(android.graphics.Typeface.create("sans-serif",active?android.graphics.Typeface.BOLD:android.graphics.Typeface.NORMAL));}
     }
+    @Override public void onViewAdded(View child){super.onViewAdded(child);updateLabels();}
     @Override protected void dispatchDraw(Canvas canvas){
         if(getChildCount()>0){View first=getChildAt(0);float step=first.getWidth()+a.dp(2);
             float left=first.getLeft()+position*step,extra=first.getWidth()*stretch;
             pill.set(Math.max(getPaddingLeft(),left-extra/2),first.getTop()+a.dp(stretch*5),
                 Math.min(getWidth()-getPaddingRight(),left+first.getWidth()+extra/2),first.getBottom()-a.dp(stretch*5));
-            paint.setColor(0xffeeeee8);canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);
-            paint.setColor(0xffffffff);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(a.dp(1));
+            paint.setColor(0xffe5e6d9);canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);
+            paint.setColor(0xffc5c7b7);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(a.dp(1));
             canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);paint.setStyle(Paint.Style.FILL);
+            float center=pill.centerX(),bottom=pill.bottom-a.dp(4);
+            paint.setColor(0xff656b50);canvas.drawRoundRect(center-a.dp(9),bottom-a.dp(2),center+a.dp(9),bottom,a.dp(1),a.dp(1),paint);
         }
         super.dispatchDraw(canvas);
     }
