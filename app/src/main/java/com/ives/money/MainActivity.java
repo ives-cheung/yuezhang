@@ -53,11 +53,11 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle b){
         resolveTheme();setTheme(darkMode?R.style.MoneyThemeDark:R.style.MoneyThemeLight);super.onCreate(b);
-        getWindow().setStatusBarColor(WHITE);getWindow().setNavigationBarColor(WHITE);
+        getWindow().setStatusBarColor(SURFACE);getWindow().setNavigationBarColor(SURFACE);
         getWindow().getDecorView().setSystemUiVisibility(darkMode?0:(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         load();loadWallets();loadReceivables();ledger=new LedgerUi(this);if(b!=null){dailyMode=b.getBoolean("dailyMode",true);walletMode=b.getBoolean("walletMode",false);try{ledger.month=YearMonth.parse(b.getString("ledgerMonth",""));}catch(Exception ignored){}}render();
     }
-    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff6e6e73;BLUE=UiKit.ACCENT;LINE=0xffe5e5ea;SURFACE=0xfff2f2f7;}
+    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff6e6e73;BLUE=UiKit.ACCENT;LINE=0xffe2e1dd;SURFACE=0xfff2f1ed;}
     void removeBundledExamplesOnce(){
         android.content.SharedPreferences p=getSharedPreferences("money",MODE_PRIVATE);
         if(p.getBoolean("sample_cleanup_v1",false))return;
@@ -74,21 +74,21 @@ public class MainActivity extends Activity {
     void applyInsets(View v){final int left=v.getPaddingLeft(),right=v.getPaddingRight(),top=v.getPaddingTop(),bottom=v.getPaddingBottom();v.setOnApplyWindowInsetsListener((view,insets)->{view.setPadding(left,top+insets.getSystemWindowInsetTop(),right,bottom+insets.getSystemWindowInsetBottom());return insets;});v.requestApplyInsets();}
 
     void render(){
-        root=column();root.setBackgroundColor(WHITE);setContentView(root);applyInsets(root);
+        root=column();root.setBackgroundColor(SURFACE);setContentView(root);applyInsets(root);
         LinearLayout header=row();pad(header,20,8,20,10);
         ImageView brandMark=new ImageView(this);brandMark.setImageResource(R.drawable.brand_mark);brandMark.setBackground(bg(0xff0B2736,14));brandMark.setContentDescription("月账 · 星球盈余");header.addView(brandMark,new LinearLayout.LayoutParams(dp(28),dp(28)));
         LinearLayout brand=column();LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-2,1);bp.leftMargin=dp(12);header.addView(brand,bp);brand.addView(text("月账",18,BLACK,true));
         root.addView(header);
-        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);LinearLayout tabs=row();pad(tabs,3,3,3,3);tabs.setBackground(bg(SURFACE,12));tabWrap.addView(tabs);
+        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);LinearLayout tabs=row();pad(tabs,3,3,3,3);tabs.setBackground(UiKit.glass(this,25,false));UiKit.glassDepth(this,tabs,2);tabWrap.addView(tabs);
         TextView daily=tab("日常记账",dailyMode), subscriptions=tab("订阅支出",!dailyMode&&!walletMode), balances=tab("钱包余额",!dailyMode&&walletMode);
         for(TextView t:new TextView[]{daily,subscriptions,balances}){LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,dp(44),1);tp.setMargins(dp(1),0,dp(1),0);tabs.addView(t,tp);}
         daily.setOnClickListener(v->{dailyMode=true;walletMode=false;render();});subscriptions.setOnClickListener(v->{dailyMode=false;walletMode=false;ledger.stop();render();});balances.setOnClickListener(v->{dailyMode=false;walletMode=true;ledger.stop();render();});root.addView(tabWrap);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);feed=column();feed.setBackgroundColor(SURFACE);scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         if(dailyMode)ledger.renderFeed();else if(walletMode)renderWalletFeed();else renderFeed();
-        LinearLayout bottom=column();bottom.setBackgroundColor(WHITE);pad(bottom,20,8,20,10);View line=new View(this);line.setBackgroundColor(LINE);
+        LinearLayout bottom=column();bottom.setBackgroundColor(SURFACE);pad(bottom,20,8,20,10);View line=new View(this);line.setBackgroundColor(LINE);
         TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(48));ap.topMargin=0;bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
     }
-    TextView tab(String label,boolean selected){TextView t=text(label,13,selected?BLACK:GRAY,selected);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,selected?WHITE:Color.TRANSPARENT,9,0));t.setSelected(selected);t.setFocusable(true);return t;}
+    TextView tab(String label,boolean selected){TextView t=text(label,13,selected?BLACK:GRAY,selected);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,selected?WHITE:Color.TRANSPARENT,22,0));t.setSelected(selected);t.setFocusable(true);return t;}
     int heroColor(){return SURFACE;}
     int heroText(){return BLACK;}
     int heroMuted(){return GRAY;}
@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
     TextView primaryButton(String label){return UiKit.button(this,label,true);}
     View divider(){View v=new View(this);v.setBackgroundColor(LINE);v.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(1)));return v;}
 
-    LinearLayout groupedList(){LinearLayout list=column();pad(list,14,0,14,0);list.setBackground(bg(WHITE,18));list.setClipToOutline(true);return list;}
+    LinearLayout groupedList(){LinearLayout list=column();pad(list,14,0,14,0);list.setBackground(UiKit.glass(this,20,false));list.setClipToOutline(true);return list;}
     View insetDivider(){View v=new View(this);v.setBackgroundColor(LINE);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,Math.max(1,dp(.5f)));p.leftMargin=dp(46);v.setLayoutParams(p);return v;}
     LinearLayout summary(String label,String value,String detail){
         LinearLayout panel=column();pad(panel,24,18,24,24);feed.addView(panel);
@@ -222,7 +222,7 @@ public class MainActivity extends Activity {
         page.addView(actions);dialog.setContentView(page);Window window=dialog.getWindow();if(window!=null){window.setBackgroundDrawable(new ColorDrawable(WHITE));window.setStatusBarColor(WHITE);window.setNavigationBarColor(WHITE);window.getDecorView().setSystemUiVisibility(darkMode?0:(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);window.setDimAmount(0f);window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE|WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);window.setWindowAnimations(0);window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);}dialog.setOnDismissListener(d->{if(root!=null)root.setVisibility(View.VISIBLE);});root.setVisibility(View.INVISIBLE);dialog.show();if(window!=null){window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);applyInsets(page);}
     }
     TextView cycleOption(String label){TextView t=text(label,14,BLACK,false);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,SURFACE,12,0));t.setFocusable(true);return t;}
-    void styleCycle(TextView t,boolean selected){t.setTextColor(selected?BLACK:GRAY);t.setBackground(UiKit.surface(this,selected?WHITE:Color.TRANSPARENT,9,0));t.setSelected(selected);}
+    void styleCycle(TextView t,boolean selected){t.setTextColor(selected?BLACK:GRAY);t.setBackground(UiKit.surface(this,selected?WHITE:Color.TRANSPARENT,22,0));t.setSelected(selected);}
     void walletForm(Wallet old,int idx){
         Dialog dialog=new Dialog(this,R.style.MoneyThemeLight);LinearLayout page=column();page.setBackgroundColor(WHITE);
         LinearLayout top=row();pad(top,20,8,20,12);TextView close=UiKit.iconButton(this,R.drawable.ic_ui_back,"返回");top.addView(close,new LinearLayout.LayoutParams(dp(44),dp(44)));close.setOnClickListener(v->dialog.dismiss());TextView title=text(old==null?"添加余额账户":"更新余额",17,BLACK,true);title.setGravity(Gravity.CENTER);top.addView(title,new LinearLayout.LayoutParams(0,dp(44),1));top.addView(text("　",20,BLACK,false),new LinearLayout.LayoutParams(dp(44),dp(44)));page.addView(top);page.addView(divider());

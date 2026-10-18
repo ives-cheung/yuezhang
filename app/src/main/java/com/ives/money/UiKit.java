@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 /** Shared phone controls: vector icons, touch feedback and scrollable action sheets. */
 final class UiKit {
-    static final int INK=0xff1c1c1e, ACCENT=0xff007aff, TINT=0xffedf4ff;
+    static final int INK=0xff1c1c1e, ACCENT=0xff353532, TINT=0xffe9e8e4;
     static final int DANGER=0xffd93632;
     private UiKit() {}
 
@@ -25,8 +25,18 @@ final class UiKit {
     static Drawable surface(MainActivity a,int color,int radius,int stroke){
         GradientDrawable shape=a.bg(color,radius);
         if(stroke!=0)shape.setStroke(a.dp(1),stroke);
-        int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x18007aff;
+        int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x142e2e2b;
         return new RippleDrawable(ColorStateList.valueOf(feedback),shape,a.bg(Color.WHITE,radius));
+    }
+    static Drawable glass(MainActivity a,int radius,boolean prominent){
+        GradientDrawable shell=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+            prominent?new int[]{0xfaffffff,0xeee7e7e3}:new int[]{0xeefefefd,0xdaf2f2ee});
+        shell.setCornerRadius(a.dp(radius));shell.setStroke(Math.max(1,a.dp(.7f)),0xfaffffff);
+        return new RippleDrawable(ColorStateList.valueOf(0x142e2e2b),shell,a.bg(Color.WHITE,radius));
+    }
+    static void glassDepth(MainActivity a,View view,float elevation){
+        view.setElevation(a.dp(elevation));
+        if(android.os.Build.VERSION.SDK_INT>=28){view.setOutlineAmbientShadowColor(0x18302f29);view.setOutlineSpotShadowColor(0x20302f29);}
     }
     static Drawable inputBackground(MainActivity a){
         StateListDrawable states=new StateListDrawable();
@@ -61,12 +71,12 @@ final class UiKit {
     }
     static TextView button(MainActivity a,String label,boolean primary){
         String clean=label.replace("＋","").trim();
-        TextView t=a.text(clean,15,primary?a.WHITE:a.BLACK,true);t.setGravity(Gravity.CENTER);
+        TextView t=a.text(clean,15,INK,true);t.setGravity(Gravity.CENTER);
         t.setMinHeight(a.dp(48));a.pad(t,18,8,18,8);t.setMaxLines(2);
-        t.setBackground(surface(a,primary?ACCENT:a.WHITE,14,primary?0:a.LINE));
+        t.setBackground(primary?glass(a,24,true):surface(a,Color.TRANSPARENT,24,0));if(primary)glassDepth(a,t,2);
         t.setClickable(true);t.setFocusable(true);buttonSemantics(t);
         int icon=actionIcon(clean);if(icon==0&&primary)icon=R.drawable.ic_ui_check;
-        if(icon!=0)leading(a,t,icon,primary?a.WHITE:ACCENT);
+        if(icon!=0)leading(a,t,icon,ACCENT);
         return t;
     }
     static TextView textAction(MainActivity a,String label,boolean destructive){
@@ -85,7 +95,7 @@ final class UiKit {
         button.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         button.setContentDescription(description);button.setFocusable(true);button.setClickable(true);
         button.setMinimumWidth(a.dp(48));button.setMinimumHeight(a.dp(48));
-        button.setBackground(surface(a,destructive?0xfffceeee:TINT,12,0));
+        button.setBackground(glass(a,24,false));
         buttonSemantics(button);return button;
     }
     static void picker(MainActivity a,TextView t,int leading){
@@ -125,7 +135,7 @@ final class UiKit {
                     int size=View.MeasureSpec.getSize(heightSpec);if(size>0)limit=Math.min(limit,size);
                     super.onMeasure(widthSpec,View.MeasureSpec.makeMeasureSpec(limit,View.MeasureSpec.AT_MOST));
                 }
-            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(a.bg(a.WHITE,28));
+            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(glass(a,30,false));glassDepth(a,page,8);
             if(android.os.Build.VERSION.SDK_INT>=29)page.setForceDarkAllowed(false);
             View handle=new View(a);handle.setBackground(a.bg(0xffdce2e4,3));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(a.dp(32),a.dp(4));hp.gravity=Gravity.CENTER_HORIZONTAL;hp.topMargin=a.dp(10);hp.bottomMargin=a.dp(18);page.addView(handle,hp);
             LinearLayout header=a.row();a.pad(header,20,0,16,14);ImageView badge=icon(a,icon,22,ACCENT);badge.setBackground(a.bg(TINT,12));a.pad(badge,7,7,7,7);header.addView(badge,new LinearLayout.LayoutParams(a.dp(36),a.dp(36)));
@@ -138,13 +148,13 @@ final class UiKit {
             footer=a.column();a.pad(footer,20,12,20,16);page.addView(footer);
         }
         TextView action(String title,boolean destructive,Runnable run){
-            TextView b=button(a,title,true);if(destructive){b.setBackground(surface(a,DANGER,16,0));leading(a,b,R.drawable.ic_ui_trash,a.WHITE);}
+            TextView b=button(a,title,true);if(destructive){b.setBackground(surface(a,DANGER,24,0));b.setTextColor(a.WHITE);leading(a,b,R.drawable.ic_ui_trash,a.WHITE);}
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,a.dp(52));lp.bottomMargin=a.dp(8);footer.addView(b,lp);b.setOnClickListener(v->run.run());return b;
         }
         void cancel(String label){TextView b=button(a,label,false);footer.addView(b,new LinearLayout.LayoutParams(-1,a.dp(48)));b.setOnClickListener(v->close());}
         void show(){
             dialog.setContentView(page);dialog.setCanceledOnTouchOutside(true);
-            Window w=dialog.getWindow();if(w!=null){w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);w.setDimAmount(.32f);w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE|WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);w.setNavigationBarColor(a.WHITE);w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);w.setWindowAnimations(R.style.MoneySheetAnimation);}
+            Window w=dialog.getWindow();if(w!=null){w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));w.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);w.setDimAmount(.18f);if(android.os.Build.VERSION.SDK_INT>=31){w.addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);WindowManager.LayoutParams blur=w.getAttributes();blur.setBlurBehindRadius(a.dp(18));w.setAttributes(blur);}w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE|WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);w.setNavigationBarColor(a.WHITE);w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);w.setWindowAnimations(R.style.MoneySheetAnimation);}
             dialog.show();if(w!=null){w.setLayout(Math.min(a.dp(560),a.getResources().getDisplayMetrics().widthPixels-a.dp(24)),-2);w.setGravity(Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL);WindowManager.LayoutParams attributes=w.getAttributes();attributes.y=a.dp(12);w.setAttributes(attributes);}
         }
         void close(){View focused=dialog.getCurrentFocus();if(focused!=null)((InputMethodManager)a.getSystemService(MainActivity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(focused.getWindowToken(),0);dialog.dismiss();}
