@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(darkMode?0:(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         load();loadWallets();loadReceivables();ledger=new LedgerUi(this);if(b!=null){dailyMode=b.getBoolean("dailyMode",true);walletMode=b.getBoolean("walletMode",false);try{ledger.month=YearMonth.parse(b.getString("ledgerMonth",""));}catch(Exception ignored){}}render();
     }
-    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff777770;BLUE=UiKit.ACCENT;LINE=0xffe8e8e2;SURFACE=0xfff7f7f3;}
+    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff565e69;BLUE=UiKit.ACCENT;LINE=0xffd4d8df;SURFACE=0xffeff1f4;}
     void removeBundledExamplesOnce(){
         android.content.SharedPreferences p=getSharedPreferences("money",MODE_PRIVATE);
         if(p.getBoolean("sample_cleanup_v1",false))return;
@@ -213,7 +213,7 @@ public class MainActivity extends Activity {
     int categoryColor(String c){if(darkMode)return c.contains("影音")?0xff432b2b:c.contains("云")?0xff24384c:c.contains("效率")?0xff382e49:0xff253931;if(c.contains("影音"))return 0xffffeded;if(c.contains("云"))return 0xffeaf3ff;if(c.contains("效率"))return 0xfff0ebff;return 0xffedf3f0;}
 
     TextView fieldLabel(String value){TextView t=text(value,12,GRAY,false);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=dp(16);t.setLayoutParams(p);return t;}
-    EditText field(String hint,String value,int type){EditText e=new EditText(this);e.setSingleLine(true);e.setTextSize(15);e.setTextColor(BLACK);e.setHintTextColor(0xffa3a8ad);e.setHint(hint);e.setInputType(type);e.setPadding(dp(15),0,dp(15),0);e.setBackground(UiKit.inputBackground(this));if(value!=null)e.setText(value);e.setMinHeight(dp(48));return e;}
+    EditText field(String hint,String value,int type){EditText e=new EditText(this);e.setSingleLine(true);e.setTextSize(15);e.setTextColor(BLACK);e.setHintTextColor(0xff69727e);e.setHint(hint);e.setInputType(type);e.setPadding(dp(15),0,dp(15),0);e.setBackground(UiKit.inputBackground(this));if(value!=null)e.setText(value);e.setMinHeight(dp(48));return e;}
     void addField(LinearLayout form,String label,View view){form.addView(fieldLabel(label));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,dp(48));p.topMargin=dp(8);form.addView(view,p);}
     String dateLabel(LocalDate d){return d.format(dateFmt);}
 

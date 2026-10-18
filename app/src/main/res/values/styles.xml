@@ -2,7 +2,7 @@
     <style name="MoneyTheme" parent="@style/MoneyThemeLight" />
     <style name="MoneyThemeLight" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#55554F</item>
+        <item name="android:colorAccent">#343A43</item>
         <item name="android:windowBackground">#FFFFFF</item>
         <item name="android:statusBarColor">#FFFFFF</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
@@ -11,7 +11,7 @@
     </style>
     <style name="MoneySheetTheme" parent="android:style/Theme.Material.Light.Dialog.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#55554F</item>
+        <item name="android:colorAccent">#343A43</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowMinWidthMajor">0dp</item>
@@ -23,7 +23,7 @@
     </style>
     <style name="MoneyThemeDark" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#D4D3CD</item>
+        <item name="android:colorAccent">#D6DAE0</item>
         <item name="android:statusBarColor">#111315</item>
         <item name="android:navigationBarColor">#111315</item>
         <item name="android:windowLightStatusBar">false</item>

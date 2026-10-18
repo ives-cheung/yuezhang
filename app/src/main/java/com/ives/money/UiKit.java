@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 /** Shared phone controls: vector icons, touch feedback and scrollable action sheets. */
 final class UiKit {
-    static final int INK=0xff1c1c1e, ACCENT=0xff55554f, TINT=0xffeeeee9;
+    static final int INK=0xff1c1c1e, ACCENT=0xff343a43, TINT=0xffe5e8ed;
     static final int DANGER=0xffd93632;
     private UiKit() {}
 
@@ -25,18 +25,18 @@ final class UiKit {
     static Drawable surface(MainActivity a,int color,int radius,int stroke){
         GradientDrawable shape=a.bg(color,radius);
         if(stroke!=0)shape.setStroke(a.dp(1),stroke);
-        int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x142e2e2b;
+        int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x18343a43;
         return new RippleDrawable(ColorStateList.valueOf(feedback),shape,a.bg(Color.WHITE,radius));
     }
     // Solid porcelain-white surfaces; depth comes from the outline and a restrained shadow.
     static Drawable porcelain(MainActivity a,int radius,boolean prominent){
         GradientDrawable shell=a.bg(Color.WHITE,radius);
-        shell.setStroke(Math.max(1,a.dp(.5f)),prominent?0xffe4e4df:0xffefefeb);
-        return new RippleDrawable(ColorStateList.valueOf(0x10585850),shell,a.bg(Color.WHITE,radius));
+        shell.setStroke(Math.max(1,a.dp(.5f)),prominent?0xff9ca3ad:0xffd5d9df);
+        return new RippleDrawable(ColorStateList.valueOf(0x18343a43),shell,a.bg(Color.WHITE,radius));
     }
     static void porcelainDepth(MainActivity a,View view,float elevation){
         view.setElevation(a.dp(Math.min(elevation,3f)));
-        if(android.os.Build.VERSION.SDK_INT>=28){view.setOutlineAmbientShadowColor(0x10535349);view.setOutlineSpotShadowColor(0x14535349);}
+        if(android.os.Build.VERSION.SDK_INT>=28){view.setOutlineAmbientShadowColor(0x18313945);view.setOutlineSpotShadowColor(0x20313945);}
     }
     static Drawable inputBackground(MainActivity a){
         StateListDrawable states=new StateListDrawable();
@@ -135,7 +135,7 @@ final class UiKit {
                     int size=View.MeasureSpec.getSize(heightSpec);if(size>0)limit=Math.min(limit,size);
                     super.onMeasure(widthSpec,View.MeasureSpec.makeMeasureSpec(limit,View.MeasureSpec.AT_MOST));
                 }
-            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(surface(a,0xe8ffffff,30,0xf0ffffff));porcelainDepth(a,page,8);
+            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(surface(a,0xfaffffff,30,0xffd5d9df));porcelainDepth(a,page,8);
             if(android.os.Build.VERSION.SDK_INT>=29)page.setForceDarkAllowed(false);
             View handle=new View(a);handle.setBackground(a.bg(0xffdce2e4,3));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(a.dp(32),a.dp(4));hp.gravity=Gravity.CENTER_HORIZONTAL;hp.topMargin=a.dp(10);hp.bottomMargin=a.dp(18);page.addView(handle,hp);
             LinearLayout header=a.row();a.pad(header,20,0,16,14);ImageView badge=icon(a,icon,22,ACCENT);badge.setBackground(a.bg(TINT,12));a.pad(badge,7,7,7,7);header.addView(badge,new LinearLayout.LayoutParams(a.dp(36),a.dp(36)));
