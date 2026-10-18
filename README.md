@@ -1,23 +1,26 @@
 <p align="center"><img src="docs/logo.png" width="112" alt="月账 Logo" /></p>
 <h1 align="center">月账 · Yuezhang</h1>
 <p align="center">日常记账 · 本地截图识别 · 订阅支出 · 钱包余额</p>
-<p align="center"><a href="https://github.com/ives-cheung/yuezhang/releases/download/v1.2.0-alpha.1/com.ives.money_20261018_002_Alpha.apk">下载 Android 安装包</a> · <a href="https://github.com/ives-cheung/yuezhang/releases/tag/v1.2.0-alpha.1">发布说明</a> · <a href="LICENSE">MIT License</a></p>
+<p align="center"><a href="https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/com.ives.money_20261018_003_Alpha.apk">下载 Android 安装包</a> · <a href="https://github.com/ives-cheung/yuezhang/releases/tag/v1.2.1-alpha.1">发布说明</a> · <a href="LICENSE">MIT License</a></p>
 
 月账是一款面向手机竖屏的 Android 个人记账应用，包名为 `com.ives.money`。默认使用浅色界面。
 Logo「星球盈余」将地球圆环、空间数据轨道和收支曲线融合在一起。
 
 ## 下载与安装
 
-- **[下载 com.ives.money_20261018_002_Alpha.apk](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.0-alpha.1/com.ives.money_20261018_002_Alpha.apk)**
-- [查看安装包 SHA-256 校验值](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.0-alpha.1/SHA256SUMS)
+- **[下载 com.ives.money_20261018_003_Alpha.apk](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/com.ives.money_20261018_003_Alpha.apk)**
+- [查看安装包 SHA-256 校验值](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/SHA256SUMS)
 - [所有版本](https://github.com/ives-cheung/yuezhang/releases)
 
-当前版本：**1.2.0 Alpha**，支持 **Android 8.0 / API 26 及以上**。
+当前版本：**1.2.1 Alpha**，支持 **Android 8.0 / API 26 及以上**。
 下载 APK 后在手机上打开安装。发布包为调试签名的 Alpha 构建；覆盖已有安装需要相同签名。
 
 ## 功能
 
 ### 日常记账
+
+- 截图导入和文字快记使用统一线性图标；表单、日期及品牌选择弹层采用一致的浅色圆角样式。
+- 主操作、次操作和删除操作区分样式，按钮支持按下反馈，输入框支持聚焦描边。
 
 - 手动记录支出、收入、退款、转账、还款、充值和不计收支的流水。
 - 按月份与日期查看流水、已记录净支出、收入及退款。
@@ -101,6 +104,7 @@ Logo「星球盈余」将地球圆环、空间数据轨道和收支曲线融合�
 | --- | --- |
 | `MainActivity.java` | 订阅、钱包、应收账款及共用图标组件 |
 | `LedgerUi.java` | 日常流水、编辑表单及批量核对清单 |
+| `UiKit.java` | 共用矢量图标、按钮、日期控件和底部弹层 |
 | `LedgerDb.java` | SQLite 存储和数据升级 |
 | `ScreenshotImporter.java` | 本地中文 OCR 与长截图分段识别 |
 | `BillParser.java` | 截图与文字的账单规则解析 |
