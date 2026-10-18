@@ -42,7 +42,7 @@ final class LedgerUi {
         a.feed.removeAllViews();importStatus=null;List<LedgerEntry> records=db.month(month.toString());List<LedgerEntry> drafts=db.list(true);
         LinearLayout section=a.column();a.pad(section,20,10,20,20);a.feed.addView(section);
         LinearLayout dateRow=a.row();section.addView(dateRow,lp(-1,48));
-        LinearLayout monthControl=a.row();a.pad(monthControl,12,0,10,0);monthControl.setBackground(UiKit.glass(a,24,false));
+        LinearLayout monthControl=a.row();a.pad(monthControl,12,0,10,0);monthControl.setBackground(UiKit.porcelain(a,24,false));
         LinearLayout.LayoutParams monthp=new LinearLayout.LayoutParams(0,a.dp(48),1);monthp.rightMargin=a.dp(8);dateRow.addView(monthControl,monthp);
         TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),17,a.BLACK,true);title.setGravity(Gravity.CENTER_VERTICAL);title.setSingleLine(true);title.setMinWidth(0);title.setAutoSizeTextTypeUniformWithConfiguration(12,17,1,android.util.TypedValue.COMPLEX_UNIT_SP);
         monthControl.addView(title,new LinearLayout.LayoutParams(0,-1,1));ImageView down=UiKit.icon(a,R.drawable.ic_ui_down,14,a.GRAY);LinearLayout.LayoutParams downp=lp(18,18);downp.leftMargin=a.dp(6);monthControl.addView(down,downp);

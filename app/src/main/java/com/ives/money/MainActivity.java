@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(darkMode?0:(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR));
         load();loadWallets();loadReceivables();ledger=new LedgerUi(this);if(b!=null){dailyMode=b.getBoolean("dailyMode",true);walletMode=b.getBoolean("walletMode",false);try{ledger.month=YearMonth.parse(b.getString("ledgerMonth",""));}catch(Exception ignored){}}render();
     }
-    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff6e6e73;BLUE=UiKit.ACCENT;LINE=0xffe2e1dd;SURFACE=0xfff2f1ed;}
+    void resolveTheme(){darkMode=false;BLACK=UiKit.INK;WHITE=Color.WHITE;GRAY=0xff777770;BLUE=UiKit.ACCENT;LINE=0xffe8e8e2;SURFACE=0xfff7f7f3;}
     void removeBundledExamplesOnce(){
         android.content.SharedPreferences p=getSharedPreferences("money",MODE_PRIVATE);
         if(p.getBoolean("sample_cleanup_v1",false))return;
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
         ImageView brandMark=new ImageView(this);brandMark.setImageResource(R.drawable.brand_mark);brandMark.setBackground(bg(0xff0B2736,14));brandMark.setContentDescription("月账 · 星球盈余");header.addView(brandMark,new LinearLayout.LayoutParams(dp(28),dp(28)));
         LinearLayout brand=column();LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-2,1);bp.leftMargin=dp(12);header.addView(brand,bp);brand.addView(text("月账",18,BLACK,true));
         root.addView(header);
-        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);LinearLayout tabs=row();pad(tabs,3,3,3,3);tabs.setBackground(UiKit.glass(this,25,false));UiKit.glassDepth(this,tabs,2);tabWrap.addView(tabs);
+        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);LinearLayout tabs=row();pad(tabs,3,3,3,3);tabs.setBackground(UiKit.porcelain(this,25,false));UiKit.porcelainDepth(this,tabs,2);tabWrap.addView(tabs);
         TextView daily=tab("日常记账",dailyMode), subscriptions=tab("订阅支出",!dailyMode&&!walletMode), balances=tab("钱包余额",!dailyMode&&walletMode);
         for(TextView t:new TextView[]{daily,subscriptions,balances}){LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,dp(44),1);tp.setMargins(dp(1),0,dp(1),0);tabs.addView(t,tp);}
         daily.setOnClickListener(v->{dailyMode=true;walletMode=false;render();});subscriptions.setOnClickListener(v->{dailyMode=false;walletMode=false;ledger.stop();render();});balances.setOnClickListener(v->{dailyMode=false;walletMode=true;ledger.stop();render();});root.addView(tabWrap);
@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
     TextView primaryButton(String label){return UiKit.button(this,label,true);}
     View divider(){View v=new View(this);v.setBackgroundColor(LINE);v.setLayoutParams(new LinearLayout.LayoutParams(-1,dp(1)));return v;}
 
-    LinearLayout groupedList(){LinearLayout list=column();pad(list,14,0,14,0);list.setBackground(UiKit.glass(this,20,false));list.setClipToOutline(true);return list;}
+    LinearLayout groupedList(){LinearLayout list=column();pad(list,14,0,14,0);list.setBackground(UiKit.porcelain(this,20,false));list.setClipToOutline(true);return list;}
     View insetDivider(){View v=new View(this);v.setBackgroundColor(LINE);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,Math.max(1,dp(.5f)));p.leftMargin=dp(46);v.setLayoutParams(p);return v;}
     LinearLayout summary(String label,String value,String detail){
         LinearLayout panel=column();pad(panel,24,18,24,24);feed.addView(panel);

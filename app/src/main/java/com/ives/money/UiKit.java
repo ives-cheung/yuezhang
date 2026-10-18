@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 /** Shared phone controls: vector icons, touch feedback and scrollable action sheets. */
 final class UiKit {
-    static final int INK=0xff1c1c1e, ACCENT=0xff353532, TINT=0xffe9e8e4;
+    static final int INK=0xff1c1c1e, ACCENT=0xff55554f, TINT=0xffeeeee9;
     static final int DANGER=0xffd93632;
     private UiKit() {}
 
@@ -28,15 +28,15 @@ final class UiKit {
         int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x142e2e2b;
         return new RippleDrawable(ColorStateList.valueOf(feedback),shape,a.bg(Color.WHITE,radius));
     }
-    static Drawable glass(MainActivity a,int radius,boolean prominent){
-        GradientDrawable shell=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-            prominent?new int[]{0xfaffffff,0xeee7e7e3}:new int[]{0xeefefefd,0xdaf2f2ee});
-        shell.setCornerRadius(a.dp(radius));shell.setStroke(Math.max(1,a.dp(.7f)),0xfaffffff);
-        return new RippleDrawable(ColorStateList.valueOf(0x142e2e2b),shell,a.bg(Color.WHITE,radius));
+    // Solid porcelain-white surfaces; depth comes from the outline and a restrained shadow.
+    static Drawable porcelain(MainActivity a,int radius,boolean prominent){
+        GradientDrawable shell=a.bg(Color.WHITE,radius);
+        shell.setStroke(Math.max(1,a.dp(.5f)),prominent?0xffe4e4df:0xffefefeb);
+        return new RippleDrawable(ColorStateList.valueOf(0x10585850),shell,a.bg(Color.WHITE,radius));
     }
-    static void glassDepth(MainActivity a,View view,float elevation){
-        view.setElevation(a.dp(elevation));
-        if(android.os.Build.VERSION.SDK_INT>=28){view.setOutlineAmbientShadowColor(0x18302f29);view.setOutlineSpotShadowColor(0x20302f29);}
+    static void porcelainDepth(MainActivity a,View view,float elevation){
+        view.setElevation(a.dp(Math.min(elevation,3f)));
+        if(android.os.Build.VERSION.SDK_INT>=28){view.setOutlineAmbientShadowColor(0x10535349);view.setOutlineSpotShadowColor(0x14535349);}
     }
     static Drawable inputBackground(MainActivity a){
         StateListDrawable states=new StateListDrawable();
@@ -73,7 +73,7 @@ final class UiKit {
         String clean=label.replace("＋","").trim();
         TextView t=a.text(clean,15,INK,true);t.setGravity(Gravity.CENTER);
         t.setMinHeight(a.dp(48));a.pad(t,18,8,18,8);t.setMaxLines(2);
-        t.setBackground(primary?glass(a,24,true):surface(a,Color.TRANSPARENT,24,0));if(primary)glassDepth(a,t,2);
+        t.setBackground(primary?porcelain(a,24,true):surface(a,Color.TRANSPARENT,24,0));if(primary)porcelainDepth(a,t,2);
         t.setClickable(true);t.setFocusable(true);buttonSemantics(t);
         int icon=actionIcon(clean);if(icon==0&&primary)icon=R.drawable.ic_ui_check;
         if(icon!=0)leading(a,t,icon,ACCENT);
@@ -95,7 +95,7 @@ final class UiKit {
         button.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         button.setContentDescription(description);button.setFocusable(true);button.setClickable(true);
         button.setMinimumWidth(a.dp(48));button.setMinimumHeight(a.dp(48));
-        button.setBackground(glass(a,24,false));
+        button.setBackground(porcelain(a,24,false));
         buttonSemantics(button);return button;
     }
     static void picker(MainActivity a,TextView t,int leading){
@@ -135,7 +135,7 @@ final class UiKit {
                     int size=View.MeasureSpec.getSize(heightSpec);if(size>0)limit=Math.min(limit,size);
                     super.onMeasure(widthSpec,View.MeasureSpec.makeMeasureSpec(limit,View.MeasureSpec.AT_MOST));
                 }
-            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(glass(a,30,false));glassDepth(a,page,8);
+            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(porcelain(a,30,false));porcelainDepth(a,page,8);
             if(android.os.Build.VERSION.SDK_INT>=29)page.setForceDarkAllowed(false);
             View handle=new View(a);handle.setBackground(a.bg(0xffdce2e4,3));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(a.dp(32),a.dp(4));hp.gravity=Gravity.CENTER_HORIZONTAL;hp.topMargin=a.dp(10);hp.bottomMargin=a.dp(18);page.addView(handle,hp);
             LinearLayout header=a.row();a.pad(header,20,0,16,14);ImageView badge=icon(a,icon,22,ACCENT);badge.setBackground(a.bg(TINT,12));a.pad(badge,7,7,7,7);header.addView(badge,new LinearLayout.LayoutParams(a.dp(36),a.dp(36)));
