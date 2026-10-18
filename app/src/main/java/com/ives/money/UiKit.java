@@ -135,7 +135,7 @@ final class UiKit {
                     int size=View.MeasureSpec.getSize(heightSpec);if(size>0)limit=Math.min(limit,size);
                     super.onMeasure(widthSpec,View.MeasureSpec.makeMeasureSpec(limit,View.MeasureSpec.AT_MOST));
                 }
-            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(porcelain(a,30,false));porcelainDepth(a,page,8);
+            };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(surface(a,0xe8ffffff,30,0xf0ffffff));porcelainDepth(a,page,8);
             if(android.os.Build.VERSION.SDK_INT>=29)page.setForceDarkAllowed(false);
             View handle=new View(a);handle.setBackground(a.bg(0xffdce2e4,3));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(a.dp(32),a.dp(4));hp.gravity=Gravity.CENTER_HORIZONTAL;hp.topMargin=a.dp(10);hp.bottomMargin=a.dp(18);page.addView(handle,hp);
             LinearLayout header=a.row();a.pad(header,20,0,16,14);ImageView badge=icon(a,icon,22,ACCENT);badge.setBackground(a.bg(TINT,12));a.pad(badge,7,7,7,7);header.addView(badge,new LinearLayout.LayoutParams(a.dp(36),a.dp(36)));

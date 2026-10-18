@@ -46,11 +46,11 @@ final class FluidTabs extends LinearLayout {
             float left=first.getLeft()+position*step,extra=first.getWidth()*stretch;
             pill.set(Math.max(getPaddingLeft(),left-extra/2),first.getTop()+a.dp(stretch*5),
                 Math.min(getWidth()-getPaddingRight(),left+first.getWidth()+extra/2),first.getBottom()-a.dp(stretch*5));
-            paint.setColor(0x70e5dff0);canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);
-            paint.setColor(0xc0ffffff);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(a.dp(1));
+            paint.setColor(0xb8ffffff);canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);
+            paint.setColor(0xffddddda);paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(a.dp(1));
             canvas.drawRoundRect(pill,a.dp(22),a.dp(22),paint);paint.setStyle(Paint.Style.FILL);
             float center=pill.centerX(),bottom=pill.bottom-a.dp(4);
-            paint.setColor(0xff82738f);canvas.drawRoundRect(center-a.dp(9),bottom-a.dp(2),center+a.dp(9),bottom,a.dp(1),a.dp(1),paint);
+            paint.setColor(0xff70716c);canvas.drawRoundRect(center-a.dp(9),bottom-a.dp(2),center+a.dp(9),bottom,a.dp(1),a.dp(1),paint);
         }
         super.dispatchDraw(canvas);
     }
