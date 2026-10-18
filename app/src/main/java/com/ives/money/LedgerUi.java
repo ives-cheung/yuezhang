@@ -85,7 +85,7 @@ final class LedgerUi {
         String meta=e.category+(e.time.isEmpty()?"":" · "+e.time);paragraph(info,meta,11,a.GRAY,false,4);
         LinearLayout amounts=a.column();amounts.setGravity(Gravity.RIGHT);LinearLayout.LayoutParams am=lp(-2,-2);am.leftMargin=a.dp(12);r.addView(amounts,am);
         TextView amount=a.text((e.type.equals(LedgerEntry.EXPENSE)?"−":e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?"+":"")+money(e.cents),15,e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?0xff21805b:a.BLACK,true);amount.setSingleLine(true);amount.setMaxWidth(a.dp(146));amount.setAutoSizeTextTypeUniformWithConfiguration(10,15,1,android.util.TypedValue.COMPLEX_UNIT_SP);amounts.addView(amount);
-        if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,a.WHITE,14,0));r.setOnClickListener(v->open.run());
+        if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,android.graphics.Color.TRANSPARENT,14,0));r.setOnClickListener(v->open.run());
     }
     void label(LinearLayout p,String s){paragraph(p,s,13,a.GRAY,true,18);}
     void input(LinearLayout p,String label,View field,int height){label(p,label);LinearLayout.LayoutParams x=lp(-1,height);x.topMargin=a.dp(8);p.addView(field,x);}
