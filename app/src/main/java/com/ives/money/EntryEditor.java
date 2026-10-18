@@ -1,6 +1,7 @@
 package com.ives.money;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.*;
 import android.view.*;
 import android.widget.*;
@@ -13,7 +14,7 @@ final class EntryEditor {
     final LedgerUi ui;
     final MainActivity a;
     final LedgerEntry entry;
-    final boolean draft;
+    final boolean draft,fresh;
     final Runnable done;
     final LedgerUi.Page page;
     final EditText amount,description,category;
@@ -29,36 +30,45 @@ final class EntryEditor {
     boolean categoryChosen;
 
     EntryEditor(LedgerUi ledger,LedgerEntry original,boolean isDraft,Runnable callback){
+        this(ledger,original,isDraft,callback,null);
+    }
+    EntryEditor(LedgerUi ledger,LedgerEntry original,boolean isDraft,Runnable callback,LedgerUi.Page existing){
         ui=ledger;a=ui.a;entry=original.copy();draft=isDraft;done=callback;
-        boolean fresh=!draft&&entry.cents==0&&entry.title.isEmpty();
+        fresh=!draft&&entry.cents==0&&entry.title.isEmpty();
         if(fresh&&entry.time.isEmpty())entry.time=LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
-        page=ui.new Page(draft?"核对这笔账单":fresh?"记一笔":"编辑账单");
-        a.pad(page.body,20,8,20,14);a.pad(page.footer,16,10,16,10);
+        String title=draft?"核对这笔账单":fresh?"记一笔":"编辑账单";
+        page=existing==null?ui.new Page(title):existing;if(existing!=null)page.replaceContent(title);
+        page.scroll.setBackgroundColor(a.SURFACE);a.pad(page.body,16,16,16,20);a.pad(page.footer,16,10,16,10);
+        page.body.setFocusableInTouchMode(true);page.body.requestFocus();
 
-        amountLabel=a.text("金额",12,a.GRAY,true);page.body.addView(amountLabel);
-        LinearLayout amountRow=a.row();amountRow.setBackground(a.bg(UiKit.TINT,20));a.pad(amountRow,16,0,12,0);
-        LinearLayout.LayoutParams ap=ui.lp(-1,76);ap.topMargin=a.dp(8);page.body.addView(amountRow,ap);
+        LinearLayout hero=a.column();hero.setBackground(a.bg(a.WHITE,24));a.pad(hero,18,14,18,10);page.body.addView(hero,ui.lp(-1,-2));
+        amountLabel=a.text("金额",12,a.GRAY,true);hero.addView(amountLabel);
+        LinearLayout amountRow=a.row();LinearLayout.LayoutParams ap=ui.lp(-1,66);ap.topMargin=a.dp(4);hero.addView(amountRow,ap);
         amountRow.addView(a.text("¥",26,a.BLACK,true),ui.lp(30,-2));
         amount=a.field("0.00",entry.cents>0?entry.amount():"",InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        amount.setTextSize(36);amount.setBackgroundColor(Color.TRANSPARENT);amount.setSelectAllOnFocus(true);amount.setFontFeatureSettings("tnum");a.pad(amount,8,0,0,0);
+        amount.setShowSoftInputOnFocus(false);amount.setTextSize(36);amount.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));amount.setBackgroundColor(Color.TRANSPARENT);amount.setSelectAllOnFocus(true);amount.setFontFeatureSettings("tnum");a.pad(amount,8,0,0,0);
         amountRow.addView(amount,new LinearLayout.LayoutParams(0,-1,1));amount.setContentDescription("记账金额");
 
-        ui.space(page.body,12);addTypes();
+        ui.space(page.body,14);addTypes();
+        LinearLayout form=a.column();form.setBackground(a.bg(a.WHITE,22));a.pad(form,14,12,14,12);LinearLayout.LayoutParams fp=ui.lp(-1,-2);fp.topMargin=a.dp(14);page.body.addView(form,fp);
+        TextView noteLabel=a.text("用途 / 备注",12,a.GRAY,true);form.addView(noteLabel);
         description=a.field("用途 / 备注（选填）",combinedDescription(entry),InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        description.setSingleLine(false);description.setMaxLines(3);description.setGravity(Gravity.CENTER_VERTICAL);a.pad(description,14,10,14,10);
-        LinearLayout.LayoutParams np=ui.lp(-1,60);np.topMargin=a.dp(12);page.body.addView(description,np);
+        description.setSingleLine(false);description.setMaxLines(4);description.setMinHeight(a.dp(64));description.setGravity(Gravity.CENTER_VERTICAL);a.pad(description,14,10,14,10);
+        description.setHint("写点什么（选填）");description.setTextSize(15);LinearLayout.LayoutParams np=ui.lp(-1,-2);np.topMargin=a.dp(8);form.addView(description,np);
 
         category=a.field("分类",entry.category,InputType.TYPE_CLASS_TEXT);
-        LinearLayout meta=a.row();LinearLayout.LayoutParams mp=ui.lp(-1,46);mp.topMargin=a.dp(10);page.body.addView(meta,mp);
+        LinearLayout meta=a.row();LinearLayout.LayoutParams mp=ui.lp(-1,48);mp.topMargin=a.dp(10);form.addView(meta,mp);
         categoryButton=ui.picker(entry.category);UiKit.picker(a,categoryButton,R.drawable.ic_ui_category);categoryButton.setTextSize(13);
-        LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(0,-1,1);cp.rightMargin=a.dp(5);meta.addView(categoryButton,cp);categoryButton.setOnClickListener(v->{activateAmount();chooseCategory();});
+        categoryButton.setMaxLines(1);categoryButton.setEllipsize(TextUtils.TruncateAt.END);compactMeta(categoryButton,R.drawable.ic_ui_category);
+        LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(0,-1,1);cp.rightMargin=a.dp(5);meta.addView(categoryButton,cp);categoryButton.setOnClickListener(v->{preparePicker();chooseCategory();});
         dateButton=ui.picker(dateLabel());UiKit.picker(a,dateButton,R.drawable.ic_ui_calendar);dateButton.setTextSize(13);
+        dateButton.setMaxLines(1);dateButton.setEllipsize(TextUtils.TruncateAt.END);compactMeta(dateButton,R.drawable.ic_ui_calendar);
         LinearLayout.LayoutParams dp=new LinearLayout.LayoutParams(0,-1,1);dp.leftMargin=a.dp(5);meta.addView(dateButton,dp);
-        dateButton.setOnClickListener(v->{activateAmount();LocalDate date;try{date=LocalDate.parse(entry.date);}catch(Exception ex){date=LocalDate.now();}UiKit.pickDate(a,"账单日期",date,selected->{entry.date=selected.toString();dateButton.setText(dateLabel());});});
-        brand=new CarBrandControl(a,description,category,ui.loanBrand(entry));page.body.addView(brand.root);
+        dateButton.setOnClickListener(v->{preparePicker();LocalDate date;try{date=LocalDate.parse(entry.date);}catch(Exception ex){date=LocalDate.now();}UiKit.pickDate(a,"账单日期",date,selected->{entry.date=selected.toString();dateButton.setText(dateLabel());});});
+        brand=new CarBrandControl(a,description,category,ui.loanBrand(entry));form.addView(brand.root);
 
         TextView more=UiKit.textAction(a,"更多信息",false);more.setGravity(Gravity.CENTER_VERTICAL);more.setCompoundDrawablesRelative(null,null,UiKit.drawable(a,R.drawable.ic_ui_down,18,a.GRAY),null);page.body.addView(more,ui.lp(-1,42));
-        extras=a.column();extras.setVisibility(View.GONE);page.body.addView(extras);
+        extras=a.column();extras.setBackground(a.bg(a.WHITE,22));a.pad(extras,14,0,14,16);extras.setVisibility(View.GONE);page.body.addView(extras);
         more.setOnClickListener(v->{boolean open=extras.getVisibility()!=View.VISIBLE;extras.setVisibility(open?View.VISIBLE:View.GONE);more.setText(open?"收起信息":"更多信息");});
         if(!entry.imagePath.isEmpty()){TextView compare=ui.picker("对照原始截图");UiKit.picker(a,compare,R.drawable.ic_ui_image);extras.addView(compare,ui.lp(-1,48));compare.setOnClickListener(v->ui.preview(entry.imagePath));}
         EditText time=a.field("例如 12:30（选填）",entry.time,InputType.TYPE_CLASS_DATETIME|InputType.TYPE_DATETIME_VARIATION_TIME);ui.input(extras,"时间",time,50);
@@ -74,6 +84,9 @@ final class EntryEditor {
         save.setOnClickListener(v->save(time,order));refreshTypes();
     }
 
+    void compactMeta(TextView button,int icon){
+        a.pad(button,10,0,10,0);button.setCompoundDrawablesRelative(UiKit.drawable(a,icon,18,a.BLUE),null,null,null);button.setCompoundDrawablePadding(a.dp(8));
+    }
     static String combinedDescription(LedgerEntry e){
         String title=e.title.equals("待补充商家")?"":e.title;
         if(e.note.isEmpty()||e.note.equals(title))return title;
@@ -84,20 +97,20 @@ final class EntryEditor {
         catch(Exception ex){return "选择日期";}
     }
     void addTypes(){
-        LinearLayout grid=a.column();page.body.addView(grid,ui.lp(-1,-2));
+        LinearLayout grid=a.column();grid.setBackground(a.bg(a.WHITE,22));a.pad(grid,6,10,6,10);page.body.addView(grid,ui.lp(-1,-2));
         for(int row=0;row<2;row++){
-            LinearLayout line=a.row();LinearLayout.LayoutParams rp=ui.lp(-1,58);if(row>0)rp.topMargin=a.dp(6);grid.addView(line,rp);
+            LinearLayout line=a.row();LinearLayout.LayoutParams rp=ui.lp(-1,64);if(row>0)rp.topMargin=a.dp(6);grid.addView(line,rp);
             for(int col=0;col<4;col++){
                 int index=row*4+col;LinearLayout tile=a.column();tile.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,-1,1);if(col>0)p.leftMargin=a.dp(6);line.addView(tile,p);
                 if(index>=LedgerEntry.TYPES.length){tile.setVisibility(View.INVISIBLE);continue;}
-                typeTiles[index]=tile;typeIcons[index]=UiKit.icon(a,icons[index],22,a.GRAY);tile.addView(typeIcons[index],ui.lp(24,24));
+                typeTiles[index]=tile;typeIcons[index]=UiKit.icon(a,icons[index],20,a.GRAY);a.pad(typeIcons[index],7,7,7,7);tile.addView(typeIcons[index],ui.lp(34,34));
                 typeLabels[index]=a.text(LedgerEntry.TYPES[index],12,a.GRAY,true);LinearLayout.LayoutParams lp=ui.lp(-2,-2);lp.topMargin=a.dp(4);tile.addView(typeLabels[index],lp);
                 tile.setContentDescription(LedgerEntry.TYPES[index]);tile.setFocusable(true);UiKit.buttonSemantics(tile);tile.setOnClickListener(v->{entry.type=LedgerEntry.TYPES[index];refreshTypes();});
             }
         }
     }
     void refreshTypes(){
-        for(int i=0;i<typeTiles.length;i++){boolean active=LedgerEntry.TYPES[i].equals(entry.type);typeTiles[i].setSelected(active);typeTiles[i].setBackground(UiKit.surface(a,active?UiKit.TINT:a.SURFACE,14,active?UiKit.ACCENT:0));typeIcons[i].setImageDrawable(UiKit.drawable(a,icons[i],22,active?a.BLUE:a.GRAY));typeLabels[i].setTextColor(active?a.BLUE:a.GRAY);}
+        for(int i=0;i<typeTiles.length;i++){boolean active=LedgerEntry.TYPES[i].equals(entry.type);typeTiles[i].setSelected(active);typeTiles[i].setBackground(UiKit.surface(a,Color.TRANSPARENT,16,0));typeIcons[i].setBackground(a.bg(active?UiKit.INK:a.SURFACE,17));typeIcons[i].setImageDrawable(UiKit.drawable(a,icons[i],20,active?a.WHITE:a.GRAY));typeLabels[i].setTextColor(active?a.BLACK:a.GRAY);}
         amountLabel.setText(entry.type+"金额");subscription.setVisibility(entry.type.equals(LedgerEntry.EXPENSE)?View.VISIBLE:View.GONE);refund.setVisibility(entry.type.equals(LedgerEntry.REFUND)?View.VISIBLE:View.GONE);
     }
     int categoryIcon(String name){
@@ -141,6 +154,14 @@ final class EntryEditor {
         if(!draft&&duplicate==2){ui.toast("这笔账单已经入账，请在原记录中修改");return;}
         if(!draft&&duplicate==1)UiKit.confirm(a,"核对重复账单","已存在同日、同金额、同商家的账单，仍保存这笔？","仍然保存",false,persist);else persist.run();
     }
-    void activateAmount(){keyboard.activate();}
-    void show(){page.show();keyboard.activate();if(amount.length()>0)amount.selectAll();}
+    void preparePicker(){
+        View focused=page.dialog.getCurrentFocus();
+        if(focused!=null)((android.view.inputmethod.InputMethodManager)a.getSystemService(MainActivity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(focused.getWindowToken(),0);
+        page.body.requestFocus();
+    }
+    void show(){
+        if(fresh){amount.requestFocus();keyboard.show();if(amount.length()>0)amount.selectAll();}
+        else{page.body.requestFocus();keyboard.hide();}
+        page.show();
+    }
 }

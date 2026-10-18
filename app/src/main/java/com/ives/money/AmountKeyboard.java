@@ -42,7 +42,7 @@ final class AmountKeyboard {
     }
     void activate(){amount.requestFocus();show();}
     void show(){
-        ((InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(amount.getWindowToken(),0);
+        if(amount.getWindowToken()!=null)((InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(amount.getWindowToken(),0);
         root.setVisibility(View.VISIBLE);toggle.setVisibility(View.GONE);
     }
     void hide(){root.setVisibility(View.GONE);toggle.setVisibility(View.VISIBLE);}

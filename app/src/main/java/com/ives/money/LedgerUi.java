@@ -88,14 +88,15 @@ final class LedgerUi {
     void input(LinearLayout p,String label,View field,int height){label(p,label);LinearLayout.LayoutParams x=lp(-1,height);x.topMargin=a.dp(8);p.addView(field,x);}
     TextView picker(String label){TextView b=a.text(label,15,a.BLACK,true);UiKit.picker(a,b,0);b.setMinHeight(a.dp(52));return b;}
     final class Page {
-        final Dialog dialog;final LinearLayout page,body,footer;final ScrollView scroll;
+        final Dialog dialog;final LinearLayout page,body,footer;final ScrollView scroll;final TextView heading;
         Page(String title){
             dialog=new Dialog(a,R.style.MoneyThemeLight);page=a.column();page.setBackgroundColor(a.WHITE);
-            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->dialog.dismiss());TextView heading=a.text(title,18,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);page.addView(a.divider());
+            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->close());heading=a.text(title,18,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);page.addView(a.divider());
             scroll=new ScrollView(a);scroll.setFillViewport(false);body=a.column();a.pad(body,20,8,20,24);scroll.addView(body);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));footer=a.column();a.pad(footer,20,12,20,12);page.addView(a.divider());page.addView(footer);
         }
         void button(String label,Runnable action){TextView b=a.primaryButton(label);footer.addView(b,lp(-1,52));b.setOnClickListener(v->action.run());}
-        void show(){dialog.setContentView(page);Window w=dialog.getWindow();if(w!=null){w.setBackgroundDrawable(new ColorDrawable(a.WHITE));w.setStatusBarColor(a.WHITE);w.setNavigationBarColor(a.WHITE);w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE|WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);}dialog.show();if(w!=null)w.setLayout(-1,-1);a.applyInsets(page);}
+        void replaceContent(String title){heading.setText(title);body.removeAllViews();footer.removeAllViews();scroll.scrollTo(0,0);}
+        void show(){if(dialog.isShowing())return;dialog.setContentView(page);a.applyInsets(page);Window w=dialog.getWindow();if(w!=null){w.setBackgroundDrawable(new ColorDrawable(a.WHITE));w.setStatusBarColor(a.WHITE);w.setNavigationBarColor(a.WHITE);w.setWindowAnimations(0);w.setLayout(-1,-1);w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE|WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);}dialog.show();if(w!=null)w.setLayout(-1,-1);}
         void close(){View focused=dialog.getCurrentFocus();if(focused!=null)((InputMethodManager)a.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(focused.getWindowToken(),0);dialog.dismiss();}
     }
     void details(LedgerEntry e){
@@ -107,7 +108,7 @@ final class LedgerUi {
         if(!e.imagePath.isEmpty()){space(p.body,16);TextView image=picker("查看原始截图");UiKit.picker(a,image,R.drawable.ic_ui_image);p.body.addView(image,lp(-1,52));image.setOnClickListener(v->preview(e.imagePath));}
         if(!e.raw.isEmpty())rawBlock(p.body,e.raw);
         LinearLayout actions=a.row();actions.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);p.footer.addView(actions,lp(-1,52));
-        ImageView edit=UiKit.iconAction(a,R.drawable.ic_ui_edit,"编辑账单",false);edit.setTooltipText("编辑账单");actions.addView(edit,lp(52,52));edit.setOnClickListener(v->{p.close();edit(e,false,()->a.render());});
+        ImageView edit=UiKit.iconAction(a,R.drawable.ic_ui_edit,"编辑账单",false);edit.setTooltipText("编辑账单");actions.addView(edit,lp(52,52));edit.setOnClickListener(v->new EntryEditor(this,e,false,()->a.render(),p).show());
         ImageView del=UiKit.iconAction(a,R.drawable.ic_ui_trash,"删除账单",true);del.setTooltipText("删除账单");LinearLayout.LayoutParams dp=lp(52,52);dp.leftMargin=a.dp(12);actions.addView(del,dp);del.setOnClickListener(v->UiKit.confirm(a,"删除账单","删除这笔账单？","删除账单",true,()->{db.delete(e.id);p.close();a.render();}));p.show();
     }
     void info(LinearLayout parent,String key,String value){label(parent,key);paragraph(parent,value,15,a.BLACK,false,5);}
