@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
     int BLACK, WHITE, GRAY, BLUE, LINE, SURFACE;
     boolean darkMode;
     LinearLayout root, feed;
+    FluidTabs navigation;ScrollView mainScroll;TextView addAction;
     ArrayList<Sub> items=new ArrayList<>();
     ArrayList<Wallet> wallets=new ArrayList<>();
     ArrayList<Receivable> receivables=new ArrayList<>();
@@ -79,16 +80,27 @@ public class MainActivity extends Activity {
         ImageView brandMark=new ImageView(this);brandMark.setImageResource(R.drawable.brand_mark);brandMark.setBackground(bg(0xff0B2736,14));brandMark.setContentDescription("月账 · 星球盈余");header.addView(brandMark,new LinearLayout.LayoutParams(dp(28),dp(28)));
         LinearLayout brand=column();LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-2,1);bp.leftMargin=dp(12);header.addView(brand,bp);brand.addView(text("月账",18,BLACK,true));
         root.addView(header);
-        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);LinearLayout tabs=row();pad(tabs,3,3,3,3);tabs.setBackground(UiKit.porcelain(this,25,false));UiKit.porcelainDepth(this,tabs,2);tabWrap.addView(tabs);
+        LinearLayout tabWrap=column();pad(tabWrap,20,0,20,12);FluidTabs tabs=new FluidTabs(this,dailyMode?0:walletMode?2:1);navigation=tabs;tabWrap.addView(tabs);
         TextView daily=tab("日常记账",dailyMode), subscriptions=tab("订阅支出",!dailyMode&&!walletMode), balances=tab("钱包余额",!dailyMode&&walletMode);
         for(TextView t:new TextView[]{daily,subscriptions,balances}){LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,dp(44),1);tp.setMargins(dp(1),0,dp(1),0);tabs.addView(t,tp);}
-        daily.setOnClickListener(v->{dailyMode=true;walletMode=false;render();});subscriptions.setOnClickListener(v->{dailyMode=false;walletMode=false;ledger.stop();render();});balances.setOnClickListener(v->{dailyMode=false;walletMode=true;ledger.stop();render();});root.addView(tabWrap);
-        ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);feed=column();feed.setBackgroundColor(SURFACE);scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+        daily.setOnClickListener(v->switchTab(0));subscriptions.setOnClickListener(v->switchTab(1));balances.setOnClickListener(v->switchTab(2));root.addView(tabWrap);
+        ScrollView scroll=new ScrollView(this);mainScroll=scroll;scroll.setFillViewport(true);scroll.setVerticalScrollBarEnabled(false);feed=column();feed.setBackgroundColor(SURFACE);scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         if(dailyMode)ledger.renderFeed();else if(walletMode)renderWalletFeed();else renderFeed();
         LinearLayout bottom=column();bottom.setBackgroundColor(SURFACE);pad(bottom,20,8,20,10);View line=new View(this);line.setBackgroundColor(LINE);
-        TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(48));ap.topMargin=0;bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
+        TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");addAction=add;LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(48));ap.topMargin=0;bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
     }
-    TextView tab(String label,boolean selected){TextView t=text(label,13,selected?BLACK:GRAY,selected);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,selected?WHITE:Color.TRANSPARENT,22,0));t.setSelected(selected);t.setFocusable(true);return t;}
+    void switchTab(int index){
+        int previous=dailyMode?0:walletMode?2:1;if(previous==index)return;
+        ledger.stop();dailyMode=index==0;walletMode=index==2;navigation.select(index);
+        feed.animate().cancel();feed.setAlpha(1);feed.setTranslationX(0);
+        if(dailyMode)ledger.renderFeed();else if(walletMode)renderWalletFeed();else renderFeed();
+        mainScroll.scrollTo(0,0);addAction.setText(dailyMode?"记一笔":walletMode?"添加余额账户":"添加订阅");
+        if(android.animation.ValueAnimator.areAnimatorsEnabled()){
+            feed.setAlpha(.5f);feed.setTranslationX(dp(index>previous?8:-8));
+            feed.animate().alpha(1).translationX(0).setDuration(200).start();
+        }
+    }
+    TextView tab(String label,boolean selected){TextView t=text(label,13,selected?BLACK:GRAY,selected);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,Color.TRANSPARENT,22,0));t.setSelected(selected);t.setFocusable(true);return t;}
     int heroColor(){return SURFACE;}
     int heroText(){return BLACK;}
     int heroMuted(){return GRAY;}
