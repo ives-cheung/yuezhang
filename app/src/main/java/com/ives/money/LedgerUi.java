@@ -48,7 +48,7 @@ final class LedgerUi {
         for(TextView b:new TextView[]{prev,next}){b.setBackground(UiKit.surface(a,a.WHITE,22,0));dateRow.addView(b,lp(44,44));}
         prev.setOnClickListener(v->{month=month.minusMonths(1);a.render();});next.setOnClickListener(v->{month=month.plusMonths(1);a.render();});
         paragraph(section,"净支出",12,a.GRAY,false,10);
-        TextView total=a.text(money(LedgerRules.netExpense(records)),32,a.BLACK,true);total.setMaxLines(1);total.setAutoSizeTextTypeUniformWithConfiguration(18,32,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams totalp=lp(-1,48);section.addView(total,totalp);
+        TextView total=a.text(money(LedgerRules.netExpense(records)),28,a.BLACK,true);total.setMaxLines(1);total.setAutoSizeTextTypeUniformWithConfiguration(18,28,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams totalp=lp(-1,48);section.addView(total,totalp);
         long income=0,refund=0;for(LedgerEntry e:records){if(e.type.equals(LedgerEntry.INCOME))income+=e.cents;if(e.type.equals(LedgerEntry.REFUND))refund+=e.cents;}
         TextView stats=a.text("收入 "+money(income)+"   ·   退款 "+money(refund),12,a.GRAY,false);section.addView(stats,lp(-1,-2));
         LinearLayout tools=a.row();tools.setBackground(a.bg(a.SURFACE,14));LinearLayout.LayoutParams toolp=lp(-1,44);toolp.topMargin=a.dp(18);section.addView(tools,toolp);
@@ -91,7 +91,7 @@ final class LedgerUi {
         final Dialog dialog;final LinearLayout page,body,footer;final ScrollView scroll;final TextView heading;
         Page(String title){
             dialog=new Dialog(a,R.style.MoneyThemeLight);page=a.column();page.setBackgroundColor(a.WHITE);
-            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->close());heading=a.text(title,18,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);page.addView(a.divider());
+            LinearLayout bar=a.row();a.pad(bar,12,6,12,10);TextView back=UiKit.iconButton(a,R.drawable.ic_ui_back,"返回");bar.addView(back,lp(48,48));back.setOnClickListener(v->close());heading=a.text(title,17,a.BLACK,true);heading.setGravity(Gravity.CENTER);bar.addView(heading,new LinearLayout.LayoutParams(0,a.dp(48),1));bar.addView(new View(a),lp(48,48));page.addView(bar);page.addView(a.divider());
             scroll=new ScrollView(a);scroll.setFillViewport(false);body=a.column();a.pad(body,20,8,20,24);scroll.addView(body);page.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));footer=a.column();a.pad(footer,20,12,20,12);page.addView(a.divider());page.addView(footer);
         }
         void button(String label,Runnable action){TextView b=a.primaryButton(label);footer.addView(b,lp(-1,52));b.setOnClickListener(v->action.run());}

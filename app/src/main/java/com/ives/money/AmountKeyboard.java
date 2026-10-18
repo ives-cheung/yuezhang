@@ -23,17 +23,17 @@ final class AmountKeyboard {
         }});
         String[][] keys={{"1","2","3"},{"4","5","6"},{"7","8","9"},{".","0","删除"}};
         for(int row=0;row<keys.length;row++){
-            LinearLayout line=a.row();LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-1,a.dp(46));rp.bottomMargin=a.dp(6);root.addView(line,rp);
+            LinearLayout line=a.row();LinearLayout.LayoutParams rp=new LinearLayout.LayoutParams(-1,a.dp(44));rp.bottomMargin=a.dp(4);root.addView(line,rp);
             for(int col=0;col<3;col++){
                 String key=keys[row][col];View button;
                 if(key.equals("删除")){
                     ImageView delete=UiKit.icon(a,R.drawable.ic_ui_backspace,24,a.BLACK);delete.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
                     delete.setContentDescription("删除一位金额，长按清空");delete.setOnLongClickListener(v->{amount.setText("");return true;});button=delete;
                 }else{
-                    TextView digit=a.text(key,25,a.BLACK,false);digit.setGravity(Gravity.CENTER);digit.setFontFeatureSettings("tnum");button=digit;button.setContentDescription(key.equals(".")?"小数点":key);
+                    TextView digit=a.text(key,23,a.BLACK,false);digit.setGravity(Gravity.CENTER);digit.setFontFeatureSettings("tnum");button=digit;button.setContentDescription(key.equals(".")?"小数点":key);
                 }
-                button.setBackground(UiKit.surface(a,a.SURFACE,13,0));button.setFocusable(true);UiKit.buttonSemantics(button);
-                LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-1,1);if(col>0)bp.leftMargin=a.dp(6);line.addView(button,bp);
+                button.setBackground(UiKit.surface(a,a.SURFACE,10,0));button.setFocusable(true);UiKit.buttonSemantics(button);
+                LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-1,1);if(col>0)bp.leftMargin=a.dp(4);line.addView(button,bp);
                 button.setOnClickListener(v->press(key));
             }
         }

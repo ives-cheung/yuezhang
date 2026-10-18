@@ -43,10 +43,10 @@ final class EntryEditor {
 
         LinearLayout hero=a.column();hero.setBackground(a.bg(a.WHITE,24));a.pad(hero,18,14,18,10);page.body.addView(hero,ui.lp(-1,-2));
         amountLabel=a.text("金额",12,a.GRAY,true);hero.addView(amountLabel);
-        LinearLayout amountRow=a.row();LinearLayout.LayoutParams ap=ui.lp(-1,66);ap.topMargin=a.dp(4);hero.addView(amountRow,ap);
+        LinearLayout amountRow=a.row();LinearLayout.LayoutParams ap=ui.lp(-1,60);ap.topMargin=a.dp(4);hero.addView(amountRow,ap);
         amountRow.addView(a.text("¥",26,a.BLACK,true),ui.lp(30,-2));
         amount=a.field("0.00",entry.cents>0?entry.amount():"",InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        amount.setShowSoftInputOnFocus(false);amount.setTextSize(36);amount.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));amount.setBackgroundColor(Color.TRANSPARENT);amount.setSelectAllOnFocus(true);amount.setFontFeatureSettings("tnum");a.pad(amount,8,0,0,0);
+        amount.setShowSoftInputOnFocus(false);amount.setTextSize(32);amount.setTypeface(Typeface.create("sans-serif-medium",Typeface.NORMAL));amount.setBackgroundColor(Color.TRANSPARENT);amount.setSelectAllOnFocus(true);amount.setFontFeatureSettings("tnum");a.pad(amount,8,0,0,0);
         amountRow.addView(amount,new LinearLayout.LayoutParams(0,-1,1));amount.setContentDescription("记账金额");
 
         ui.space(page.body,14);addTypes();
@@ -99,18 +99,18 @@ final class EntryEditor {
     void addTypes(){
         LinearLayout grid=a.column();grid.setBackground(a.bg(a.WHITE,22));a.pad(grid,6,10,6,10);page.body.addView(grid,ui.lp(-1,-2));
         for(int row=0;row<2;row++){
-            LinearLayout line=a.row();LinearLayout.LayoutParams rp=ui.lp(-1,64);if(row>0)rp.topMargin=a.dp(6);grid.addView(line,rp);
+            LinearLayout line=a.row();LinearLayout.LayoutParams rp=ui.lp(-1,58);if(row>0)rp.topMargin=a.dp(6);grid.addView(line,rp);
             for(int col=0;col<4;col++){
                 int index=row*4+col;LinearLayout tile=a.column();tile.setGravity(Gravity.CENTER);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,-1,1);if(col>0)p.leftMargin=a.dp(6);line.addView(tile,p);
                 if(index>=LedgerEntry.TYPES.length){tile.setVisibility(View.INVISIBLE);continue;}
-                typeTiles[index]=tile;typeIcons[index]=UiKit.icon(a,icons[index],20,a.GRAY);a.pad(typeIcons[index],7,7,7,7);tile.addView(typeIcons[index],ui.lp(34,34));
+                typeTiles[index]=tile;typeIcons[index]=UiKit.icon(a,icons[index],20,a.GRAY);a.pad(typeIcons[index],5,5,5,5);tile.addView(typeIcons[index],ui.lp(30,30));
                 typeLabels[index]=a.text(LedgerEntry.TYPES[index],12,a.GRAY,true);LinearLayout.LayoutParams lp=ui.lp(-2,-2);lp.topMargin=a.dp(4);tile.addView(typeLabels[index],lp);
                 tile.setContentDescription(LedgerEntry.TYPES[index]);tile.setFocusable(true);UiKit.buttonSemantics(tile);tile.setOnClickListener(v->{entry.type=LedgerEntry.TYPES[index];refreshTypes();});
             }
         }
     }
     void refreshTypes(){
-        for(int i=0;i<typeTiles.length;i++){boolean active=LedgerEntry.TYPES[i].equals(entry.type);typeTiles[i].setSelected(active);typeTiles[i].setBackground(UiKit.surface(a,Color.TRANSPARENT,16,0));typeIcons[i].setBackground(a.bg(active?UiKit.INK:a.SURFACE,17));typeIcons[i].setImageDrawable(UiKit.drawable(a,icons[i],20,active?a.WHITE:a.GRAY));typeLabels[i].setTextColor(active?a.BLACK:a.GRAY);}
+        for(int i=0;i<typeTiles.length;i++){boolean active=LedgerEntry.TYPES[i].equals(entry.type);typeTiles[i].setSelected(active);typeTiles[i].setBackground(UiKit.surface(a,Color.TRANSPARENT,16,0));typeIcons[i].setBackground(a.bg(active?UiKit.ACCENT:a.SURFACE,15));typeIcons[i].setImageDrawable(UiKit.drawable(a,icons[i],20,active?a.WHITE:a.GRAY));typeLabels[i].setTextColor(active?a.BLACK:a.GRAY);}
         amountLabel.setText(entry.type+"金额");subscription.setVisibility(entry.type.equals(LedgerEntry.EXPENSE)?View.VISIBLE:View.GONE);refund.setVisibility(entry.type.equals(LedgerEntry.REFUND)?View.VISIBLE:View.GONE);
     }
     int categoryIcon(String name){

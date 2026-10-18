@@ -11,8 +11,8 @@ import java.time.LocalDate;
 
 /** Shared phone controls: vector icons, touch feedback and scrollable action sheets. */
 final class UiKit {
-    static final int INK=0xff0b2736, ACCENT=0xff087f82, TINT=0xffe9f5f3;
-    static final int DANGER=0xffc54343;
+    static final int INK=0xff1c1c1e, ACCENT=0xff007aff, TINT=0xffedf4ff;
+    static final int DANGER=0xffd93632;
     private UiKit() {}
 
     static void buttonSemantics(View view){
@@ -25,13 +25,13 @@ final class UiKit {
     static Drawable surface(MainActivity a,int color,int radius,int stroke){
         GradientDrawable shape=a.bg(color,radius);
         if(stroke!=0)shape.setStroke(a.dp(1),stroke);
-        int feedback=color==INK||color==DANGER?0x40ffffff:0x18087f82;
+        int feedback=color==INK||color==ACCENT||color==DANGER?0x40ffffff:0x18007aff;
         return new RippleDrawable(ColorStateList.valueOf(feedback),shape,a.bg(Color.WHITE,radius));
     }
     static Drawable inputBackground(MainActivity a){
         StateListDrawable states=new StateListDrawable();
         GradientDrawable focused=a.bg(0xfff1faf8,14);focused.setStroke(a.dp(1.5f),ACCENT);
-        GradientDrawable normal=a.bg(a.SURFACE,14);normal.setStroke(a.dp(1),a.LINE);
+        GradientDrawable normal=a.bg(a.SURFACE,12);
         states.addState(new int[]{android.R.attr.state_focused},focused);
         states.addState(new int[]{},normal);return states;
     }
@@ -63,7 +63,7 @@ final class UiKit {
         String clean=label.replace("＋","").trim();
         TextView t=a.text(clean,15,primary?a.WHITE:a.BLACK,true);t.setGravity(Gravity.CENTER);
         t.setMinHeight(a.dp(48));a.pad(t,18,8,18,8);t.setMaxLines(2);
-        t.setBackground(surface(a,primary?INK:a.WHITE,16,primary?0:a.LINE));
+        t.setBackground(surface(a,primary?ACCENT:a.WHITE,14,primary?0:a.LINE));
         t.setClickable(true);t.setFocusable(true);buttonSemantics(t);
         int icon=actionIcon(clean);if(icon==0&&primary)icon=R.drawable.ic_ui_check;
         if(icon!=0)leading(a,t,icon,primary?a.WHITE:ACCENT);
@@ -76,8 +76,8 @@ final class UiKit {
     }
     static TextView iconButton(MainActivity a,int icon,String description){
         TextView b=a.text("",16,a.BLACK,false);b.setGravity(Gravity.CENTER);
-        a.pad(b,11,11,11,11);b.setCompoundDrawablesRelative(drawable(a,icon,22,a.BLACK),null,null,null);
-        b.setContentDescription(description);b.setBackground(surface(a,a.SURFACE,16,0));b.setFocusable(true);
+        a.pad(b,11,11,11,11);b.setCompoundDrawablesRelative(drawable(a,icon,22,icon==R.drawable.ic_ui_close?a.GRAY:ACCENT),null,null,null);
+        b.setContentDescription(description);b.setBackground(surface(a,Color.TRANSPARENT,22,0));b.setFocusable(true);
         buttonSemantics(b);return b;
     }
     static ImageView iconAction(MainActivity a,int icon,String description,boolean destructive){
@@ -128,8 +128,8 @@ final class UiKit {
             };page.setOrientation(LinearLayout.VERTICAL);page.setBackground(a.bg(a.WHITE,28));
             if(android.os.Build.VERSION.SDK_INT>=29)page.setForceDarkAllowed(false);
             View handle=new View(a);handle.setBackground(a.bg(0xffdce2e4,3));LinearLayout.LayoutParams hp=new LinearLayout.LayoutParams(a.dp(32),a.dp(4));hp.gravity=Gravity.CENTER_HORIZONTAL;hp.topMargin=a.dp(10);hp.bottomMargin=a.dp(18);page.addView(handle,hp);
-            LinearLayout header=a.row();a.pad(header,20,0,16,16);ImageView badge=icon(a,icon,24,ACCENT);badge.setBackground(a.bg(TINT,16));a.pad(badge,11,11,11,11);header.addView(badge,new LinearLayout.LayoutParams(a.dp(46),a.dp(46)));
-            TextView heading=a.text(title,19,a.BLACK,true);LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,-2,1);tp.leftMargin=a.dp(12);tp.rightMargin=a.dp(8);header.addView(heading,tp);
+            LinearLayout header=a.row();a.pad(header,20,0,16,14);ImageView badge=icon(a,icon,22,ACCENT);badge.setBackground(a.bg(TINT,12));a.pad(badge,7,7,7,7);header.addView(badge,new LinearLayout.LayoutParams(a.dp(36),a.dp(36)));
+            TextView heading=a.text(title,18,a.BLACK,true);LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,-2,1);tp.leftMargin=a.dp(12);tp.rightMargin=a.dp(8);header.addView(heading,tp);
             TextView close=iconButton(a,R.drawable.ic_ui_close,"关闭");header.addView(close,new LinearLayout.LayoutParams(a.dp(44),a.dp(44)));close.setOnClickListener(v->close());page.addView(header);
             ScrollView scroll=new ScrollView(a);scroll.setClipToPadding(false);scroll.setVerticalScrollBarEnabled(false);
             body=a.column();a.pad(body,20,0,20,4);scroll.addView(body);

@@ -26,7 +26,7 @@ final class MonthPicker {
                 for(int col=0;col<3;col++){
                     YearMonth month=YearMonth.of(year[0],row*3+col+1);boolean chosen=month.equals(selected),today=month.equals(current);
                     LinearLayout tile=a.column();tile.setGravity(Gravity.CENTER);tile.setMinimumHeight(a.dp(80));a.pad(tile,8,12,8,12);
-                    tile.setBackground(UiKit.surface(a,chosen?UiKit.INK:a.SURFACE,16,chosen?0:today?UiKit.ACCENT:0));
+                    tile.setBackground(UiKit.surface(a,chosen?UiKit.ACCENT:a.SURFACE,16,chosen?0:today?UiKit.ACCENT:0));
                     TextView label=a.text(month.getMonthValue()+"月",20,chosen?a.WHITE:a.BLACK,true);tile.addView(label);
                     if(today){TextView now=a.text("本月",11,chosen?0xffcce9e5:a.BLUE,false);LinearLayout.LayoutParams np=new LinearLayout.LayoutParams(-2,-2);np.topMargin=a.dp(2);tile.addView(now,np);}
                     LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(0,-1,1);if(col>0)tp.leftMargin=a.dp(8);line.addView(tile,tp);

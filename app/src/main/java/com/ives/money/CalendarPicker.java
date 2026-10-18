@@ -26,7 +26,7 @@ final class CalendarPicker {
                     int day=row*7+col-offset+1;TextView cell=a.text("",16,a.BLACK,false);cell.setGravity(Gravity.CENTER);cell.setMinHeight(a.dp(46));a.pad(cell,0,6,0,6);LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(0,-1,1);if(col>0)cp.leftMargin=a.dp(2);line.addView(cell,cp);
                     if(day<1||day>month[0].lengthOfMonth())continue;
                     LocalDate date=month[0].atDay(day);boolean chosen=date.equals(selected),current=date.equals(today);
-                    cell.setText(String.valueOf(day));cell.setTextColor(chosen?a.WHITE:current?a.BLUE:a.BLACK);cell.setBackground(UiKit.surface(a,chosen?UiKit.INK:a.SURFACE,12,!chosen&&current?a.BLUE:0));
+                    cell.setText(String.valueOf(day));cell.setTextColor(chosen?a.WHITE:current?a.BLUE:a.BLACK);cell.setBackground(UiKit.surface(a,chosen?UiKit.ACCENT:a.SURFACE,12,!chosen&&current?a.BLUE:0));
                     cell.setSelected(chosen);cell.setFocusable(true);cell.setContentDescription(date.getYear()+"年"+date.getMonthValue()+"月"+day+"日"+(chosen?"，已选中":"")+(current?"，今天":""));UiKit.buttonSemantics(cell);
                     cell.setOnClickListener(v->{sheet.close();action.selected(date);});
                 }
