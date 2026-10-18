@@ -41,7 +41,7 @@ final class FlowCalendar {
 
     FlowCalendar(LedgerUi ledger){
         ui=ledger;a=ui.a;month=ui.month;
-        sheet=new UiKit.Sheet(a,"收支日历","",R.drawable.ic_ui_calendar);a.pad(sheet.body,12,0,12,4);
+        sheet=new UiKit.Sheet(a,"收支日历","",R.drawable.ic_ui_calendar);a.pad(sheet.body,12,0,12,12);
         LinearLayout navigation=a.row();sheet.body.addView(navigation,ui.lp(-1,44));
         TextView previous=UiKit.iconButton(a,R.drawable.ic_ui_back,"上个月");previous.setBackground(UiKit.surface(a,a.SURFACE,22,0));navigation.addView(previous,ui.lp(44,44));previous.setOnClickListener(v->{month=month.minusMonths(1);refresh();});
         heading=a.text("",18,a.BLACK,true);heading.setGravity(Gravity.CENTER);heading.setBackground(UiKit.surface(a,Color.TRANSPARENT,20,0));heading.setFocusable(true);UiKit.buttonSemantics(heading);
@@ -49,15 +49,13 @@ final class FlowCalendar {
         TextView next=UiKit.iconButton(a,R.drawable.ic_ui_chevron,"下个月");next.setBackground(UiKit.surface(a,a.SURFACE,22,0));navigation.addView(next,ui.lp(44,44));next.setOnClickListener(v->{month=month.plusMonths(1);refresh();});
 
         LinearLayout summary=a.row();a.pad(summary,4,10,4,10);LinearLayout.LayoutParams sp=ui.lp(-1,-2);sp.topMargin=a.dp(4);sheet.body.addView(summary,sp);
-        LinearLayout caption=a.column();summary.addView(caption,new LinearLayout.LayoutParams(0,-2,1));caption.addView(a.text("本月结余",13,a.BLACK,true));ui.paragraph(caption,"收入 + 退款 − 支出",10,a.GRAY,false,3);
+        LinearLayout caption=a.column();summary.addView(caption,new LinearLayout.LayoutParams(0,-2,1));caption.addView(a.text("本月结余",13,a.BLACK,true));
         netValue=a.text("",21,a.BLACK,true);netValue.setMaxLines(1);netValue.setAutoSizeTextTypeUniformWithConfiguration(12,21,1,TypedValue.COMPLEX_UNIT_SP);summary.addView(netValue,new LinearLayout.LayoutParams(0,a.dp(42),1.2f));netValue.setGravity(Gravity.CENTER_VERTICAL|Gravity.END);
         LinearLayout weekdays=a.row();LinearLayout.LayoutParams wp=ui.lp(-1,28);wp.topMargin=a.dp(6);sheet.body.addView(weekdays,wp);
         for(String day:new String[]{"一","二","三","四","五","六","日"}){TextView label=a.text(day,11,a.GRAY,false);label.setGravity(Gravity.CENTER);weekdays.addView(label,new LinearLayout.LayoutParams(0,-1,1));}
         grid=a.column();sheet.body.addView(grid,ui.lp(-1,-2));
 
-        a.pad(sheet.footer,20,12,20,14);LinearLayout footer=a.row();sheet.footer.addView(footer,ui.lp(-1,44));
-        LinearLayout legend=a.column();legend.setGravity(Gravity.CENTER_VERTICAL);legend.addView(a.text("＋ 结余增加",11,POSITIVE,false));legend.addView(a.text("− 结余减少",11,NEGATIVE,false));footer.addView(legend,new LinearLayout.LayoutParams(0,-1,1));
-        TextView list=a.secondaryButton("返回列表");a.pad(list,12,0,12,0);UiKit.leading(a,list,R.drawable.ic_ui_checklist,a.BLUE);footer.addView(list,ui.lp(108,44));list.setOnClickListener(v->sheet.close());
+        sheet.footer.setVisibility(View.GONE);
         sheet.dialog.setOnDismissListener(d->{ui.month=month;a.render();});refresh();
     }
 
