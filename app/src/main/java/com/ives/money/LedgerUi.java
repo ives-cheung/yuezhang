@@ -106,7 +106,9 @@ final class LedgerUi {
         if(!e.refundOf.isEmpty()){LedgerEntry original=findPosted(e.refundOf);info(p.body,"原支出",original==null?"原记录已删除":original.title+" · "+money(original.cents));}
         if(!e.imagePath.isEmpty()){space(p.body,16);TextView image=picker("查看原始截图");UiKit.picker(a,image,R.drawable.ic_ui_image);p.body.addView(image,lp(-1,52));image.setOnClickListener(v->preview(e.imagePath));}
         if(!e.raw.isEmpty())rawBlock(p.body,e.raw);
-        p.button("编辑账单",()->{p.close();edit(e,false,()->a.render());});TextView del=UiKit.textAction(a,"删除这笔账单",true);p.footer.addView(del,lp(-1,44));del.setOnClickListener(v->UiKit.confirm(a,"删除账单","删除这笔账单？","删除账单",true,()->{db.delete(e.id);p.close();a.render();}));p.show();
+        LinearLayout actions=a.row();actions.setGravity(Gravity.END|Gravity.CENTER_VERTICAL);p.footer.addView(actions,lp(-1,52));
+        ImageView edit=UiKit.iconAction(a,R.drawable.ic_ui_edit,"编辑账单",false);edit.setTooltipText("编辑账单");actions.addView(edit,lp(52,52));edit.setOnClickListener(v->{p.close();edit(e,false,()->a.render());});
+        ImageView del=UiKit.iconAction(a,R.drawable.ic_ui_trash,"删除账单",true);del.setTooltipText("删除账单");LinearLayout.LayoutParams dp=lp(52,52);dp.leftMargin=a.dp(12);actions.addView(del,dp);del.setOnClickListener(v->UiKit.confirm(a,"删除账单","删除这笔账单？","删除账单",true,()->{db.delete(e.id);p.close();a.render();}));p.show();
     }
     void info(LinearLayout parent,String key,String value){label(parent,key);paragraph(parent,value,15,a.BLACK,false,5);}
     String loanBrand(LedgerEntry e){if(!e.carBrand.isEmpty())return e.carBrand;for(MainActivity.Sub s:a.items)if(s.id.equals(e.subscriptionId))return s.carBrand;return "";}
