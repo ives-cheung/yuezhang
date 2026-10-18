@@ -80,6 +80,14 @@ final class UiKit {
         b.setContentDescription(description);b.setBackground(surface(a,a.SURFACE,16,0));b.setFocusable(true);
         buttonSemantics(b);return b;
     }
+    static ImageView iconAction(MainActivity a,int icon,String description,boolean destructive){
+        ImageView button=icon(a,icon,21,destructive?DANGER:ACCENT);
+        button.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        button.setContentDescription(description);button.setFocusable(true);button.setClickable(true);
+        button.setMinimumWidth(a.dp(48));button.setMinimumHeight(a.dp(48));
+        button.setBackground(surface(a,destructive?0xfffceeee:a.WHITE,14,destructive?0xfff4dada:a.LINE));
+        buttonSemantics(button);return button;
+    }
     static void picker(MainActivity a,TextView t,int leading){
         t.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);a.pad(t,15,0,15,0);
         t.setCompoundDrawablesRelative(leading==0?null:drawable(a,leading,20,ACCENT),null,drawable(a,R.drawable.ic_ui_chevron,18,a.GRAY),null);
@@ -89,12 +97,7 @@ final class UiKit {
     interface Choice { void selected(int index); }
     interface DateChoice { void selected(LocalDate date); }
     static void pickDate(MainActivity a,String title,LocalDate initial,DateChoice action){
-        Sheet s=new Sheet(a,title,"",R.drawable.ic_ui_calendar);
-        DatePicker picker=new DatePicker(a,null,0,R.style.MoneyDatePicker);
-        picker.init(initial.getYear(),initial.getMonthValue()-1,initial.getDayOfMonth(),null);
-        picker.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.gravity=Gravity.CENTER_HORIZONTAL;s.body.addView(picker,p);
-        s.action("确定日期",false,()->{LocalDate date=LocalDate.of(picker.getYear(),picker.getMonth()+1,picker.getDayOfMonth());s.close();action.selected(date);});s.cancel("取消");s.show();
+        CalendarPicker.show(a,title,initial,action);
     }
     static void choose(MainActivity a,String title,String[] options,int selected,int icon,Choice action){
         Sheet sheet=new Sheet(a,title,"",icon);

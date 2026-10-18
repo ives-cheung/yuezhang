@@ -57,6 +57,7 @@ final class LedgerUi {
         }
         if(!lastImportReport.isEmpty()){paragraph(section,lastImportReport,12,a.GRAY,false,12);}
         LinearLayout head=a.row();space(section,24);section.addView(head);head.addView(a.text("日常流水",19,a.BLACK,true));View stretch=new View(a);head.addView(stretch,new LinearLayout.LayoutParams(0,1,1));head.addView(a.text(records.size()+" 笔",12,a.GRAY,false));
+        ImageView calendar=UiKit.iconAction(a,R.drawable.ic_ui_calendar,"切换到收支日历",false);LinearLayout.LayoutParams calendarp=lp(48,48);calendarp.leftMargin=a.dp(12);head.addView(calendar,calendarp);calendar.setOnClickListener(v->new FlowCalendar(this).show());
         if(records.isEmpty()){
             LinearLayout empty=a.column();empty.setBackground(a.bg(a.SURFACE,20));empty.setGravity(Gravity.CENTER);a.pad(empty,20,26,20,26);space(section,14);section.addView(empty,lp(-1,-2));ImageView emptyIcon=UiKit.icon(a,R.drawable.ic_ui_scan,28,a.BLUE);emptyIcon.setBackground(a.bg(UiKit.TINT,18));a.pad(emptyIcon,14,14,14,14);empty.addView(emptyIcon,lp(56,56));space(empty,14);empty.addView(a.text("从一张账单截图开始",16,a.BLACK,true));paragraph(empty,"批量选择微信或支付宝截图，核对后入账。",13,a.GRAY,false,8);empty.setOnClickListener(v->importOptions());
         }else{
@@ -73,14 +74,15 @@ final class LedgerUi {
         LinearLayout top=a.row();ImageView mark=UiKit.icon(a,icon,24,accent);mark.setBackground(a.bg(tint,14));a.pad(mark,9,9,9,9);top.addView(mark,lp(42,42));top.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));top.addView(UiKit.icon(a,R.drawable.ic_ui_chevron,17,a.GRAY),lp(20,20));c.addView(top);
         paragraph(c,title,16,a.BLACK,true,14);paragraph(c,desc,12,a.GRAY,false,5);c.setMinimumHeight(a.dp(142));c.setFocusable(true);c.setContentDescription(title+"，"+desc);UiKit.buttonSemantics(c);return c;
     }
-    void chooseMonth(){UiKit.pickDate(a,"选择账单月份",month.atDay(1),date->{month=YearMonth.from(date);a.render();});}
-    void addEntryRow(LinearLayout parent,LedgerEntry e){
+    void chooseMonth(){MonthPicker.show(a,month,selected->{month=selected;a.render();});}
+    void addEntryRow(LinearLayout parent,LedgerEntry e){addEntryRow(parent,e,()->details(e));}
+    void addEntryRow(LinearLayout parent,LedgerEntry e,Runnable open){
         LinearLayout r=a.row();a.pad(r,0,14,0,14);parent.addView(r,lp(-1,-2));r.addView(a.sourceIcon(e.title,e.category,loanBrand(e),42),lp(42,42));
         LinearLayout info=a.column();LinearLayout.LayoutParams ip=new LinearLayout.LayoutParams(0,-2,1);ip.leftMargin=a.dp(12);r.addView(info,ip);TextView name=a.text(e.title,14,a.BLACK,true);name.setMaxLines(2);info.addView(name);
         String meta=e.category+(e.time.isEmpty()?"":" · "+e.time)+(e.channel.isEmpty()?"":" · "+e.channel);paragraph(info,meta,11,a.GRAY,false,4);
         LinearLayout amounts=a.column();amounts.setGravity(Gravity.RIGHT);LinearLayout.LayoutParams am=lp(-2,-2);am.leftMargin=a.dp(8);r.addView(amounts,am);
         amounts.addView(a.text((e.type.equals(LedgerEntry.EXPENSE)?"−":e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?"+":"")+money(e.cents),15,e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?0xff21805b:a.BLACK,true));
-        if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,a.WHITE,14,0));r.setOnClickListener(v->details(e));
+        if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,a.WHITE,14,0));r.setOnClickListener(v->open.run());
     }
     void label(LinearLayout p,String s){paragraph(p,s,13,a.GRAY,true,18);}
     void input(LinearLayout p,String label,View field,int height){label(p,label);LinearLayout.LayoutParams x=lp(-1,height);x.topMargin=a.dp(8);p.addView(field,x);}
@@ -121,40 +123,7 @@ final class LedgerUi {
         int base=a.getResources().getDisplayMetrics().widthPixels;final float[] zoom={1};Runnable resize=()->{image.setLayoutParams(new android.widget.FrameLayout.LayoutParams((int)(base*zoom[0]),(int)(base*zoom[0]*bitmap.getHeight()/bitmap.getWidth())));};resize.run();
         TextView scale=secondary("点击放大 / 还原");p.footer.addView(scale,lp(-1,48));scale.setOnClickListener(v->{zoom[0]=zoom[0]==1?2:1;resize.run();});p.dialog.setOnDismissListener(d->{image.setImageDrawable(null);bitmap.recycle();});p.show();
     }
-    void edit(LedgerEntry e,boolean draft,Runnable done){
-        Page p=new Page(draft?"核对这笔账单":e.title.isEmpty()?"记一笔":"编辑账单");
-        if(draft&&!e.imagePath.isEmpty()){TextView compare=picker("对照原始截图");UiKit.picker(a,compare,R.drawable.ic_ui_image);p.body.addView(compare,lp(-1,48));compare.setOnClickListener(v->preview(e.imagePath));}
-        final String[] selectedType={e.type};TextView type=picker(e.type);UiKit.picker(a,type,R.drawable.ic_ui_receipt);input(p.body,"收支类型",type,52);
-        EditText amount=a.field("0.00",e.cents>0?e.amount():"",InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);amount.setTextSize(28);input(p.body,"金额（¥）",amount,64);
-        EditText title=a.field("商家或用途",e.title.equals("待补充商家")?"":e.title,InputType.TYPE_CLASS_TEXT);input(p.body,"商家 / 用途",title,52);
-        EditText category=a.field("分类",e.category,InputType.TYPE_CLASS_TEXT);input(p.body,"分类",category,52);
-        CarBrandControl brandControl=new CarBrandControl(a,title,category,loanBrand(e));p.body.addView(brandControl.root);
-        HorizontalScrollView hs=new HorizontalScrollView(a);hs.setHorizontalScrollBarEnabled(false);LinearLayout chips=a.row();space(p.body,10);hs.addView(chips);p.body.addView(hs,lp(-1,40));for(String cat:categories){TextView c=a.text(cat,12,a.GRAY,true);c.setGravity(Gravity.CENTER);c.setBackground(UiKit.surface(a,a.SURFACE,12,0));a.pad(c,12,0,12,0);LinearLayout.LayoutParams cp=lp(-2,38);cp.rightMargin=a.dp(6);chips.addView(c,cp);c.setOnClickListener(v->category.setText(cat));}
-        final String[] date={e.date};TextView dateButton=picker(e.date.isEmpty()?"请选择日期":e.date);UiKit.picker(a,dateButton,R.drawable.ic_ui_calendar);input(p.body,"日期",dateButton,52);dateButton.setOnClickListener(v->{LocalDate d;try{d=LocalDate.parse(date[0]);}catch(Exception x){d=LocalDate.now();}UiKit.pickDate(a,"账单日期",d,selected->{date[0]=selected.toString();dateButton.setText(date[0]);});});
-        EditText time=a.field("例如 12:30（选填）",e.time,InputType.TYPE_CLASS_DATETIME|InputType.TYPE_DATETIME_VARIATION_TIME);input(p.body,"时间",time,52);
-        EditText channel=a.field("微信 / 支付宝 / 现金",e.channel,InputType.TYPE_CLASS_TEXT);input(p.body,"来源 / 支付账户",channel,52);
-        EditText payment=a.field("零钱、银行卡、信用卡等（选填）",e.payment,InputType.TYPE_CLASS_TEXT);input(p.body,"支付方式",payment,52);
-        EditText note=a.field("备注（选填）",e.note,InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);note.setSingleLine(false);note.setGravity(Gravity.TOP);a.pad(note,14,12,14,12);input(p.body,"备注",note,80);
-        LinearLayout subHolder=a.column();p.body.addView(subHolder);TextView subButton=picker(e.subscriptionId.isEmpty()?"不关联":subscriptionName(e.subscriptionId));UiKit.picker(a,subButton,R.drawable.ic_ui_link);input(subHolder,"关联订阅（选填）",subButton,52);subButton.setOnClickListener(v->selectSubscription(e,subButton));
-        LinearLayout refundHolder=a.column();p.body.addView(refundHolder);LedgerEntry original=findPosted(e.refundOf);TextView refundButton=picker(original==null?"不关联":original.title+" · "+money(original.cents));UiKit.picker(a,refundButton,R.drawable.ic_ui_link);input(refundHolder,"关联原支出（选填）",refundButton,52);refundButton.setOnClickListener(v->selectOriginal(e,refundButton));
-        TextView kindHint=a.text("",12,a.GRAY,false);paragraph(p.body,"",1,a.GRAY,false,4);p.body.addView(kindHint);
-        Runnable kindChange=()->{String k=selectedType[0];subHolder.setVisibility(k.equals(LedgerEntry.EXPENSE)?View.VISIBLE:View.GONE);refundHolder.setVisibility(k.equals(LedgerEntry.REFUND)?View.VISIBLE:View.GONE);kindHint.setText(k.equals(LedgerEntry.TRANSFER)||k.equals(LedgerEntry.REPAYMENT)||k.equals(LedgerEntry.RECHARGE)||k.equals(LedgerEntry.IGNORE)?"此类型保留流水，不计入消费。":"");};
-        type.setOnClickListener(v->UiKit.choose(a,"收支类型",LedgerEntry.TYPES,Arrays.asList(LedgerEntry.TYPES).indexOf(selectedType[0]),R.drawable.ic_ui_receipt,i->{selectedType[0]=LedgerEntry.TYPES[i];type.setText(selectedType[0]);kindChange.run();}));kindChange.run();
-        EditText order=a.field("选填，用于识别重复账单",e.txnNo,InputType.TYPE_CLASS_TEXT);input(p.body,"交易单号",order,52);if(!e.raw.isEmpty())rawBlock(p.body,e.raw);
-        p.button(draft?"保存核对结果":"保存账单",()->{
-            long cents;try{cents=LedgerEntry.parseCents(amount.getText().toString());}catch(Exception ex){amount.setError("请输入大于 0、最多两位小数的金额");return;}
-            String merchant=title.getText().toString().trim();if(merchant.isEmpty()){title.setError("请填写商家或用途");return;}
-            try{LocalDate.parse(date[0]);}catch(Exception ex){toast("请选择日期");return;}
-            String timeValue=time.getText().toString().trim();try{if(!timeValue.isEmpty()){if(timeValue.length()==4)timeValue="0"+timeValue;timeValue=LocalTime.parse(timeValue).toString();}}catch(Exception ex){time.setError("请使用 12:30 或 12:30:00 格式");return;}
-            e.carBrand=brandControl.value();e.cents=cents;e.title=merchant;e.category=category.getText().toString().trim();if(e.category.isEmpty())e.category=BillParser.category(merchant);e.date=date[0];e.time=timeValue;e.type=selectedType[0];e.channel=channel.getText().toString().trim();e.payment=payment.getText().toString().trim();e.note=note.getText().toString().trim();e.txnNo=order.getText().toString().trim();e.warning="";
-            if(!e.type.equals(LedgerEntry.EXPENSE))e.subscriptionId="";if(!e.type.equals(LedgerEntry.REFUND))e.refundOf="";
-            String refundError=validateRefund(e,db.list(false));if(!refundError.isEmpty()){toast(refundError);return;}
-            int duplicate=LedgerRules.duplicate(e,db.list(false));e.selected=duplicate==0;
-            Runnable save=()->{try{db.save(e,draft);p.close();done.run();}catch(Exception ex){toast("保存失败，请重试");}};
-            if(!draft&&duplicate==2){toast("这笔账单已经入账，请在原记录中修改");return;}
-            if(!draft&&duplicate==1)UiKit.confirm(a,"核对重复账单","已存在同日、同金额、同商家的账单，仍保存这笔？","仍然保存",false,save);else save.run();
-        });p.show();
-    }
+    void edit(LedgerEntry e,boolean draft,Runnable done){new EntryEditor(this,e,draft,done).show();}
     static String validateRefund(LedgerEntry e,List<LedgerEntry> entries){return LedgerRules.validateRefund(e,entries);}
     void selectSubscription(LedgerEntry e,TextView button){String[] labels=new String[a.items.size()+1];labels[0]="不关联";for(int i=0;i<a.items.size();i++)labels[i+1]=a.items.get(i).name+" · "+a.items.get(i).cycle;int selected=0;for(int i=0;i<a.items.size();i++)if(a.items.get(i).id.equals(e.subscriptionId))selected=i+1;UiKit.choose(a,"关联订阅",labels,selected,R.drawable.ic_ui_link,i->{e.subscriptionId=i==0?"":a.items.get(i-1).id;button.setText(labels[i]);});}
     void selectOriginal(LedgerEntry e,TextView button){List<LedgerEntry> originals=new ArrayList<>();for(LedgerEntry x:db.list(false))if(x.type.equals(LedgerEntry.EXPENSE)&&!x.id.equals(e.id))originals.add(x);String[] labels=new String[originals.size()+1];labels[0]="不关联";for(int i=0;i<originals.size();i++){LedgerEntry x=originals.get(i);labels[i+1]=x.date+"  "+x.title+"  "+money(x.cents);}int selected=0;for(int i=0;i<originals.size();i++)if(originals.get(i).id.equals(e.refundOf))selected=i+1;UiKit.choose(a,"选择原支出",labels,selected,R.drawable.ic_ui_link,i->{e.refundOf=i==0?"":originals.get(i-1).id;button.setText(labels[i]);});}
@@ -177,12 +146,15 @@ final class LedgerUi {
                 LedgerEntry e=drafts.get(index);int duplicate=LedgerRules.duplicate(e,pool);pool.add(e);if(index<reviewPage*40||index>=(reviewPage+1)*40)continue;LinearLayout card=a.column();card.setBackground(a.bg(a.SURFACE,18));a.pad(card,12,12,12,12);space(p.body,12);p.body.addView(card,lp(-1,-2));
                 LinearLayout line=a.row();card.addView(line);CheckBox check=new CheckBox(a);check.setButtonTintList(android.content.res.ColorStateList.valueOf(a.BLUE));check.setChecked(e.selected);check.setContentDescription("选择账单 "+e.title);check.setEnabled(e.valid()&&duplicate!=2);line.addView(check,lp(44,48));
                 LinearLayout content=a.column();line.addView(content,new LinearLayout.LayoutParams(0,-2,1));content.addView(a.text(e.title.isEmpty()?"待补充商家":e.title,14,a.BLACK,true));paragraph(content,(e.cents>0?money(e.cents):"待补充金额")+" · "+e.type,15,a.BLACK,true,3);paragraph(content,(e.date.isEmpty()?"日期待补充":e.date)+(e.time.isEmpty()?"":" "+e.time)+" · "+e.category,11,a.GRAY,false,4);content.setOnClickListener(v->edit(e,true,refresh[0]));
-                TextView edit=UiKit.textAction(a,"修改",false);line.addView(edit,lp(52,48));edit.setGravity(Gravity.CENTER);edit.setOnClickListener(v->edit(e,true,refresh[0]));
                 String issue=duplicate==2?"已存在同一账单":duplicate==1?"疑似重复，可对照截图后选择":"";if(!e.warning.isEmpty())issue+=(issue.isEmpty()?"":" · ")+e.warning;if(!e.valid()&&issue.isEmpty())issue="请补充金额、日期或商家";
                 if(!issue.isEmpty())paragraph(card,issue,11,0xffa46a12,false,8);
                 if(!e.subscriptionId.isEmpty())paragraph(card,"关联订阅 · "+subscriptionName(e.subscriptionId),11,a.BLUE,false,6);
-                LinearLayout options=a.row();space(card,6);card.addView(options);if(!e.imagePath.isEmpty()){TextView source=UiKit.textAction(a,"对照截图",false);options.addView(source,lp(90,38));source.setGravity(Gravity.CENTER_VERTICAL);source.setOnClickListener(v->preview(e.imagePath));}
-                View fill=new View(a);options.addView(fill,new LinearLayout.LayoutParams(0,1,1));TextView remove=UiKit.textAction(a,"移除",true);remove.setGravity(Gravity.CENTER);options.addView(remove,lp(48,38));remove.setOnClickListener(v->{db.delete(e.id);refresh[0].run();});
+                LinearLayout options=a.row();space(card,12);card.addView(options,lp(-1,48));
+                if(!e.imagePath.isEmpty()){
+                    TextView source=UiKit.textAction(a,"对照截图",false);source.setSingleLine(true);source.setEllipsize(android.text.TextUtils.TruncateAt.END);source.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);a.pad(source,8,0,8,0);options.addView(source,new LinearLayout.LayoutParams(0,-1,1));source.setOnClickListener(v->preview(e.imagePath));
+                }else options.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));
+                ImageView edit=UiKit.iconAction(a,R.drawable.ic_ui_edit,"修改账单："+e.title,false);LinearLayout.LayoutParams editp=lp(48,48);editp.leftMargin=a.dp(8);options.addView(edit,editp);edit.setOnClickListener(v->edit(e,true,refresh[0]));
+                ImageView remove=UiKit.iconAction(a,R.drawable.ic_ui_trash,"移除待核对账单："+e.title,true);LinearLayout.LayoutParams removep=lp(48,48);removep.leftMargin=a.dp(8);options.addView(remove,removep);remove.setOnClickListener(v->{db.delete(e.id);refresh[0].run();});
                 check.setOnCheckedChangeListener((b,value)->{db.select(e.id,value);refresh[0].run();});
             }
             paragraph(p.footer,"已选 "+selected+" 笔 · 净支出 "+money(net),12,a.GRAY,false,0);space(p.footer,8);p.button("确认入账（"+selected+"）",()->confirmPost(p,refresh[0]));

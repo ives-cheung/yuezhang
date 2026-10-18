@@ -1,19 +1,16 @@
 <p align="center"><img src="docs/logo.png" width="112" alt="月账 Logo" /></p>
 <h1 align="center">月账 · Yuezhang</h1>
 <p align="center">日常记账 · 本地截图识别 · 订阅支出 · 钱包余额</p>
-<p align="center"><a href="https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/com.ives.money_20261018_003_Alpha.apk">下载 Android 安装包</a> · <a href="https://github.com/ives-cheung/yuezhang/releases/tag/v1.2.1-alpha.1">发布说明</a> · <a href="LICENSE">MIT License</a></p>
+<p align="center"><a href="#功能">功能</a> · <a href="#从源码构建">从源码构建</a> · <a href="LICENSE">MIT License</a></p>
 
 月账是一款面向手机竖屏的 Android 个人记账应用，包名为 `com.ives.money`。默认使用浅色界面。
 Logo「星球盈余」将地球圆环、空间数据轨道和收支曲线融合在一起。
 
-## 下载与安装
+## 安装包与版本
 
-- **[下载 com.ives.money_20261018_003_Alpha.apk](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/com.ives.money_20261018_003_Alpha.apk)**
-- [查看安装包 SHA-256 校验值](https://github.com/ives-cheung/yuezhang/releases/download/v1.2.1-alpha.1/SHA256SUMS)
-- [所有版本](https://github.com/ives-cheung/yuezhang/releases)
-
-当前版本：**1.2.1 Alpha**，支持 **Android 8.0 / API 26 及以上**。
-下载 APK 后在手机上打开安装。发布包为调试签名的 Alpha 构建；覆盖已有安装需要相同签名。
+当前版本：**1.4.1 Alpha**，支持 **Android 8.0 / API 26 及以上**。
+本次更新仅同步源码，APK 由维护者单独提供，不通过 GitHub 发布。
+也可以按下方说明自行构建 APK。Alpha 安装包使用调试签名；覆盖已有安装需要相同签名。
 
 ## 功能
 
@@ -21,19 +18,30 @@ Logo「星球盈余」将地球圆环、空间数据轨道和收支曲线融合�
 
 - 截图导入和文字快记使用统一线性图标；表单、日期及品牌选择弹层采用一致的浅色圆角样式。
 - 主操作、次操作和删除操作区分样式，按钮支持按下反馈，输入框支持聚焦描边。
-
-- 手动记录支出、收入、退款、转账、还款、充值和不计收支的流水。
+- 手动记录支出、收入、退款、转账、还款、充值和不计收支的流水；七种类型使用图标平铺选择。
+- 金额使用应用内数字键盘，用途与备注合并为一栏，选填；日期默认今天。
+- 常用表单只需填写金额，关联订阅、原支出和交易单号等放在“更多信息”中。
+- 月份使用最近两个年份按钮和 12 个大月份按钮选择；具体交易日期使用点选日历。
 - 按月份与日期查看流水、已记录净支出、收入及退款。
 - 分类图标在日常流水、订阅与钱包中共用。
 - 信用卡还款、账户转账和充值单独标记，默认不计入消费。
 - 退款冲减净支出，可关联原支出，并检查关联退款总额。
+
+### 收支日历
+
+- 点击“日常流水”旁的日历图标，打开所选月份的每日收支日历。
+- 每日结余按 **收入 + 退款 − 支出** 计算，正数红色、负数绿色。
+- 转账、还款、充值及不计收支的流水不参与结余计算，钱包余额与订阅预计支出也不参与。
+- 日期居中，今天显示圆形标记；没有流水的日期显示中性圆点。
+- 金额保留两位小数，较长金额采用万、亿单位缩写；点击日期查看精确金额及当天流水。
+- 仅统计已入账记录，未确认的 OCR 草稿不进入日历。
 
 ### 截图批量导入
 
 1. 打开 **日常记账 → 截图导入**。
 2. 选择账单来源、截图所属年份和月份，再从相册多选截图。
 3. 在手机本地识别金额、商家、日期、时间、支付方式及可识别的交易单号。
-4. 在核对清单中修改条目、对照原图、补齐日期、选择要入账的记录。
+4. 在核对清单中使用铅笔图标修改、垃圾桶图标移除条目，也可对照原图、补齐日期和选择要入账的记录。
 5. 确认后批量入账。
 
 支持微信、支付宝账单列表或详情截图的规则提取，并对长截图分段识别。
@@ -104,7 +112,10 @@ Logo「星球盈余」将地球圆环、空间数据轨道和收支曲线融合�
 | --- | --- |
 | `MainActivity.java` | 订阅、钱包、应收账款及共用图标组件 |
 | `LedgerUi.java` | 日常流水、编辑表单及批量核对清单 |
-| `UiKit.java` | 共用矢量图标、按钮、日期控件和底部弹层 |
+| `UiKit.java` | 共用矢量图标、按钮和底部弹层 |
+| `EntryEditor.java` / `AmountKeyboard.java` | 快捷记账表单与应用内数字键盘 |
+| `MonthPicker.java` / `CalendarPicker.java` | 平面月份选择与点选日历 |
+| `FlowCalendar.java` | 每日收支结余日历与每日流水汇总 |
 | `LedgerDb.java` | SQLite 存储和数据升级 |
 | `ScreenshotImporter.java` | 本地中文 OCR 与长截图分段识别 |
 | `BillParser.java` | 截图与文字的账单规则解析 |

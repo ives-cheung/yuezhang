@@ -14,6 +14,13 @@ final class LedgerEntry {
     String type=EXPENSE, note="", txnNo="", imagePath="", sourceKey="", raw="", subscriptionId="", refundOf="", warning="", batchId="";
     long cents, createdAt=System.currentTimeMillis();
     boolean selected=true;
+    LedgerEntry copy(){
+        LedgerEntry e=new LedgerEntry();
+        e.id=id;e.title=title;e.category=category;e.date=date;e.time=time;e.channel=channel;e.payment=payment;
+        e.carBrand=carBrand;e.type=type;e.note=note;e.txnNo=txnNo;e.imagePath=imagePath;e.sourceKey=sourceKey;
+        e.raw=raw;e.subscriptionId=subscriptionId;e.refundOf=refundOf;e.warning=warning;e.batchId=batchId;
+        e.cents=cents;e.createdAt=createdAt;e.selected=selected;return e;
+    }
     String amount(){return BigDecimal.valueOf(cents,2).toPlainString();}
     static long parseCents(String value){
         String s=value.trim().replace("¥","").replace("￥","").replace("元","").replace(",","").replace(" ","");
