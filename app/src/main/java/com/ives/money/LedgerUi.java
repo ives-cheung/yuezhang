@@ -41,45 +41,45 @@ final class LedgerUi {
     void renderFeed(){
         a.feed.removeAllViews();importStatus=null;List<LedgerEntry> records=db.month(month.toString());List<LedgerEntry> drafts=db.list(true);
         LinearLayout section=a.column();a.pad(section,20,0,20,20);a.feed.addView(section);
-        LinearLayout dateRow=a.row();TextView prev=UiKit.iconButton(a,R.drawable.ic_ui_back,"上个月");dateRow.addView(prev,lp(44,44));prev.setContentDescription("上个月");prev.setOnClickListener(v->{month=month.minusMonths(1);a.render();});
-        TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),16,a.BLACK,true);title.setGravity(Gravity.CENTER);title.setCompoundDrawablesRelative(null,null,UiKit.drawable(a,R.drawable.ic_ui_down,16,a.GRAY),null);a.pad(title,12,0,12,0);title.setBackground(UiKit.surface(a,a.WHITE,14,0));dateRow.addView(title,new LinearLayout.LayoutParams(0,a.dp(44),1));title.setOnClickListener(v->chooseMonth());
-        TextView next=UiKit.iconButton(a,R.drawable.ic_ui_chevron,"下个月");dateRow.addView(next,lp(44,44));next.setContentDescription("下个月");next.setOnClickListener(v->{month=month.plusMonths(1);a.render();});section.addView(dateRow);
-        LinearLayout hero=a.column();hero.setBackground(a.bg(a.BLACK,24));a.pad(hero,20,20,20,20);space(section,6);section.addView(hero,lp(-1,-2));
-        hero.addView(a.text("已记录净支出",13,0xffc8cdd2,true));paragraph(hero,money(LedgerRules.netExpense(records)),34,android.graphics.Color.WHITE,true,8);
+        LinearLayout dateRow=a.row();section.addView(dateRow,lp(-1,44));
+        TextView title=a.text(month.format(DateTimeFormatter.ofPattern("yyyy年M月",Locale.CHINA)),17,a.BLACK,true);title.setGravity(Gravity.CENTER_VERTICAL);title.setCompoundDrawablesRelative(null,null,UiKit.drawable(a,R.drawable.ic_ui_down,15,a.GRAY),null);title.setCompoundDrawablePadding(a.dp(8));title.setBackground(UiKit.surface(a,a.WHITE,12,0));dateRow.addView(title,lp(-2,44));title.setOnClickListener(v->chooseMonth());
+        dateRow.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));
+        TextView prev=UiKit.iconButton(a,R.drawable.ic_ui_back,"上个月"),next=UiKit.iconButton(a,R.drawable.ic_ui_chevron,"下个月");
+        for(TextView b:new TextView[]{prev,next}){b.setBackground(UiKit.surface(a,a.WHITE,22,0));dateRow.addView(b,lp(44,44));}
+        prev.setOnClickListener(v->{month=month.minusMonths(1);a.render();});next.setOnClickListener(v->{month=month.plusMonths(1);a.render();});
+        paragraph(section,"净支出",12,a.GRAY,false,10);
+        TextView total=a.text(money(LedgerRules.netExpense(records)),32,a.BLACK,true);total.setMaxLines(1);total.setAutoSizeTextTypeUniformWithConfiguration(18,32,1,android.util.TypedValue.COMPLEX_UNIT_SP);LinearLayout.LayoutParams totalp=lp(-1,48);section.addView(total,totalp);
         long income=0,refund=0;for(LedgerEntry e:records){if(e.type.equals(LedgerEntry.INCOME))income+=e.cents;if(e.type.equals(LedgerEntry.REFUND))refund+=e.cents;}
-        LinearLayout stats=a.row();space(hero,14);hero.addView(stats);stats.addView(a.text("收入  "+money(income),12,0xffe1e5e8,false),new LinearLayout.LayoutParams(0,-2,1));stats.addView(a.text("退款  "+money(refund),12,0xffe1e5e8,false));
-        LinearLayout shortcuts=a.row();LinearLayout.LayoutParams sp=lp(-1,-2);sp.topMargin=a.dp(16);section.addView(shortcuts,sp);
-        LinearLayout imageCard=shortcut(R.drawable.ic_ui_scan,"截图导入","多张账单，一起识别",UiKit.ACCENT,UiKit.TINT);LinearLayout.LayoutParams left=new LinearLayout.LayoutParams(0,-1,1);left.rightMargin=a.dp(6);shortcuts.addView(imageCard,left);imageCard.setOnClickListener(v->importOptions());
-        LinearLayout textCard=shortcut(R.drawable.ic_ui_quick,"文字快记","一句话，记好多笔",0xff5269b1,0xffedf0fb);LinearLayout.LayoutParams right=new LinearLayout.LayoutParams(0,-1,1);right.leftMargin=a.dp(6);shortcuts.addView(textCard,right);textCard.setOnClickListener(v->quickEntry());
-        if(ScreenshotImporter.running){LinearLayout busy=a.row();a.pad(busy,14,14,14,14);busy.setBackground(a.bg(UiKit.TINT,16));space(section,14);section.addView(busy,lp(-1,-2));ProgressBar progress=new ProgressBar(a);busy.addView(progress,lp(24,24));TextView message=a.text("  "+ScreenshotImporter.status,13,a.BLUE,true);busy.addView(message);importStatus=message;}
+        TextView stats=a.text("收入 "+money(income)+"   ·   退款 "+money(refund),12,a.GRAY,false);section.addView(stats,lp(-1,-2));
+        LinearLayout tools=a.row();tools.setBackground(a.bg(a.SURFACE,14));LinearLayout.LayoutParams toolp=lp(-1,44);toolp.topMargin=a.dp(18);section.addView(tools,toolp);
+        LinearLayout image=compactShortcut(R.drawable.ic_ui_scan,"截图导入"),text=compactShortcut(R.drawable.ic_ui_quick,"文字快记");tools.addView(image,new LinearLayout.LayoutParams(0,-1,1));View split=new View(a);split.setBackgroundColor(a.LINE);tools.addView(split,lp(1,18));tools.addView(text,new LinearLayout.LayoutParams(0,-1,1));image.setOnClickListener(v->importOptions());text.setOnClickListener(v->quickEntry());
+        if(ScreenshotImporter.running){LinearLayout busy=a.row();space(section,12);section.addView(busy,lp(-1,36));ProgressBar progress=new ProgressBar(a);busy.addView(progress,lp(18,18));TextView message=a.text("  "+ScreenshotImporter.status,12,a.GRAY,false);busy.addView(message,new LinearLayout.LayoutParams(0,-2,1));importStatus=message;}
         if(!drafts.isEmpty()){
-            LinearLayout pending=a.row();a.pad(pending,16,16,16,16);pending.setBackground(UiKit.surface(a,UiKit.TINT,16,0));pending.addView(a.text("待核对 "+drafts.size()+" 笔账单",14,a.BLUE,true),new LinearLayout.LayoutParams(0,-2,1));pending.addView(a.text("查看 ›",13,a.BLUE,true));space(section,14);section.addView(pending,lp(-1,-2));pending.setOnClickListener(v->review());
+            LinearLayout pending=a.row();a.pad(pending,0,0,0,0);pending.setBackground(UiKit.surface(a,a.WHITE,12,0));LinearLayout.LayoutParams pp=lp(-1,44);pp.topMargin=a.dp(6);section.addView(pending,pp);pending.addView(UiKit.icon(a,R.drawable.ic_ui_checklist,18,a.BLUE),lp(22,22));TextView label=a.text("待核对 "+drafts.size()+" 笔",13,a.BLUE,true);LinearLayout.LayoutParams labelp=new LinearLayout.LayoutParams(0,-2,1);labelp.leftMargin=a.dp(8);pending.addView(label,labelp);pending.addView(UiKit.icon(a,R.drawable.ic_ui_chevron,16,a.GRAY),lp(22,22));pending.setOnClickListener(v->review());
         }
-        if(!lastImportReport.isEmpty()){paragraph(section,lastImportReport,12,a.GRAY,false,12);}
-        LinearLayout head=a.row();space(section,24);section.addView(head);head.addView(a.text("日常流水",19,a.BLACK,true));View stretch=new View(a);head.addView(stretch,new LinearLayout.LayoutParams(0,1,1));head.addView(a.text(records.size()+" 笔",12,a.GRAY,false));
-        ImageView calendar=UiKit.iconAction(a,R.drawable.ic_ui_calendar,"切换到收支日历",false);LinearLayout.LayoutParams calendarp=lp(48,48);calendarp.leftMargin=a.dp(12);head.addView(calendar,calendarp);calendar.setOnClickListener(v->new FlowCalendar(this).show());
+        space(section,18);section.addView(a.divider());
+        LinearLayout head=a.row();LinearLayout.LayoutParams headp=lp(-1,52);headp.topMargin=a.dp(6);section.addView(head,headp);head.addView(a.text("日常流水",17,a.BLACK,true));TextView count=a.text(records.size()+" 笔",12,a.GRAY,false);LinearLayout.LayoutParams countp=new LinearLayout.LayoutParams(0,-2,1);countp.leftMargin=a.dp(10);head.addView(count,countp);
+        ImageView calendar=UiKit.iconAction(a,R.drawable.ic_ui_calendar,"查看收支日历",false);calendar.setBackground(UiKit.surface(a,a.WHITE,22,0));head.addView(calendar,lp(48,48));calendar.setOnClickListener(v->new FlowCalendar(this).show());
         if(records.isEmpty()){
-            LinearLayout empty=a.column();empty.setBackground(a.bg(a.SURFACE,20));empty.setGravity(Gravity.CENTER);a.pad(empty,20,26,20,26);space(section,14);section.addView(empty,lp(-1,-2));ImageView emptyIcon=UiKit.icon(a,R.drawable.ic_ui_scan,28,a.BLUE);emptyIcon.setBackground(a.bg(UiKit.TINT,18));a.pad(emptyIcon,14,14,14,14);empty.addView(emptyIcon,lp(56,56));space(empty,14);empty.addView(a.text("从一张账单截图开始",16,a.BLACK,true));paragraph(empty,"批量选择微信或支付宝截图，核对后入账。",13,a.GRAY,false,8);empty.setOnClickListener(v->importOptions());
+            TextView empty=a.text("本月暂无流水",14,a.GRAY,false);empty.setGravity(Gravity.CENTER);section.addView(empty,lp(-1,128));
         }else{
             String date="";LinearLayout group=null;
             for(LedgerEntry e:records){if(!e.date.equals(date)){
                 date=e.date;LocalDate d=LocalDate.parse(date);String label=d.equals(LocalDate.now())?"今天":d.format(DateTimeFormatter.ofPattern("M月d日 EEEE",Locale.CHINA));
-                paragraph(section,label,13,a.GRAY,true,20);group=a.column();space(section,6);section.addView(group,lp(-1,-2));
+                paragraph(section,label,12,a.GRAY,false,16);group=a.column();space(section,2);section.addView(group,lp(-1,-2));
             }addEntryRow(group,e);group.addView(a.divider());}
         }
         monitor();
     }
-    LinearLayout shortcut(int icon,String title,String desc,int accent,int tint){
-        LinearLayout c=a.column();c.setBackground(UiKit.surface(a,a.SURFACE,20,a.LINE));a.pad(c,16,16,16,16);
-        LinearLayout top=a.row();ImageView mark=UiKit.icon(a,icon,24,accent);mark.setBackground(a.bg(tint,14));a.pad(mark,9,9,9,9);top.addView(mark,lp(42,42));top.addView(new View(a),new LinearLayout.LayoutParams(0,1,1));top.addView(UiKit.icon(a,R.drawable.ic_ui_chevron,17,a.GRAY),lp(20,20));c.addView(top);
-        paragraph(c,title,16,a.BLACK,true,14);paragraph(c,desc,12,a.GRAY,false,5);c.setMinimumHeight(a.dp(142));c.setFocusable(true);c.setContentDescription(title+"，"+desc);UiKit.buttonSemantics(c);return c;
+    LinearLayout compactShortcut(int icon,String label){
+        LinearLayout button=a.row();button.setGravity(Gravity.CENTER);button.setBackground(UiKit.surface(a,android.graphics.Color.TRANSPARENT,14,0));button.addView(UiKit.icon(a,icon,19,a.BLUE),lp(22,22));TextView title=a.text(label,13,a.BLACK,true);LinearLayout.LayoutParams tp=lp(-2,-2);tp.leftMargin=a.dp(8);button.addView(title,tp);button.setFocusable(true);button.setContentDescription(label);UiKit.buttonSemantics(button);return button;
     }
     void chooseMonth(){MonthPicker.show(a,month,selected->{month=selected;a.render();});}
     void addEntryRow(LinearLayout parent,LedgerEntry e){addEntryRow(parent,e,()->details(e));}
     void addEntryRow(LinearLayout parent,LedgerEntry e,Runnable open){
-        LinearLayout r=a.row();a.pad(r,0,14,0,14);parent.addView(r,lp(-1,-2));r.addView(a.sourceIcon(e.title,e.category,loanBrand(e),42),lp(42,42));
-        LinearLayout info=a.column();LinearLayout.LayoutParams ip=new LinearLayout.LayoutParams(0,-2,1);ip.leftMargin=a.dp(12);r.addView(info,ip);TextView name=a.text(e.title,14,a.BLACK,true);name.setMaxLines(2);info.addView(name);
-        String meta=e.category+(e.time.isEmpty()?"":" · "+e.time)+(e.channel.isEmpty()?"":" · "+e.channel);paragraph(info,meta,11,a.GRAY,false,4);
+        LinearLayout r=a.row();a.pad(r,0,12,0,12);parent.addView(r,lp(-1,-2));r.addView(a.sourceIcon(e.title,e.category,loanBrand(e),34),lp(34,34));
+        LinearLayout info=a.column();LinearLayout.LayoutParams ip=new LinearLayout.LayoutParams(0,-2,1);ip.leftMargin=a.dp(12);r.addView(info,ip);TextView name=a.text(e.title,14,a.BLACK,false);name.setMaxLines(2);info.addView(name);
+        String meta=e.category+(e.time.isEmpty()?"":" · "+e.time);paragraph(info,meta,11,a.GRAY,false,4);
         LinearLayout amounts=a.column();amounts.setGravity(Gravity.RIGHT);LinearLayout.LayoutParams am=lp(-2,-2);am.leftMargin=a.dp(8);r.addView(amounts,am);
         amounts.addView(a.text((e.type.equals(LedgerEntry.EXPENSE)?"−":e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?"+":"")+money(e.cents),15,e.type.equals(LedgerEntry.INCOME)||e.type.equals(LedgerEntry.REFUND)?0xff21805b:a.BLACK,true));
         if(!e.type.equals(LedgerEntry.EXPENSE))paragraph(amounts,e.type,11,a.GRAY,false,4);r.setBackground(UiKit.surface(a,a.WHITE,14,0));r.setOnClickListener(v->open.run());

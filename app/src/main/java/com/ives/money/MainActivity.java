@@ -75,9 +75,9 @@ public class MainActivity extends Activity {
 
     void render(){
         root=column();root.setBackgroundColor(WHITE);setContentView(root);applyInsets(root);
-        LinearLayout header=row();pad(header,22,12,22,16);
-        ImageView brandMark=new ImageView(this);brandMark.setImageResource(R.drawable.brand_mark);brandMark.setBackground(bg(0xff0B2736,14));brandMark.setContentDescription("月账 · 星球盈余");header.addView(brandMark,new LinearLayout.LayoutParams(dp(40),dp(40)));
-        LinearLayout brand=column();LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-2,1);bp.leftMargin=dp(12);header.addView(brand,bp);brand.addView(text("月账",20,BLACK,true));brand.addView(text("日常记账 · 订阅 · 余额",12,GRAY,false));
+        LinearLayout header=row();pad(header,22,dailyMode?8:12,22,dailyMode?10:16);
+        ImageView brandMark=new ImageView(this);brandMark.setImageResource(R.drawable.brand_mark);brandMark.setBackground(bg(0xff0B2736,14));brandMark.setContentDescription("月账 · 星球盈余");header.addView(brandMark,new LinearLayout.LayoutParams(dp(dailyMode?32:40),dp(dailyMode?32:40)));
+        LinearLayout brand=column();LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(0,-2,1);bp.leftMargin=dp(12);header.addView(brand,bp);brand.addView(text("月账",dailyMode?18:20,BLACK,true));if(!dailyMode)brand.addView(text("日常记账 · 订阅 · 余额",12,GRAY,false));
         root.addView(header);
         LinearLayout tabs=row();pad(tabs,20,0,20,14);
         TextView daily=tab("日常记账",dailyMode), subscriptions=tab("订阅支出",!dailyMode&&!walletMode), balances=tab("钱包余额",!dailyMode&&walletMode);
@@ -85,10 +85,10 @@ public class MainActivity extends Activity {
         daily.setOnClickListener(v->{dailyMode=true;walletMode=false;render();});subscriptions.setOnClickListener(v->{dailyMode=false;walletMode=false;ledger.stop();render();});balances.setOnClickListener(v->{dailyMode=false;walletMode=true;ledger.stop();render();});root.addView(tabs);
         ScrollView scroll=new ScrollView(this);scroll.setFillViewport(true);feed=column();scroll.addView(feed);root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         if(dailyMode)ledger.renderFeed();else if(walletMode)renderWalletFeed();else renderFeed();
-        LinearLayout bottom=column();bottom.setBackgroundColor(WHITE);pad(bottom,20,12,20,12);View line=new View(this);line.setBackgroundColor(LINE);bottom.addView(line,new LinearLayout.LayoutParams(-1,dp(1)));
-        TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(54));ap.topMargin=dp(12);bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
+        LinearLayout bottom=column();bottom.setBackgroundColor(WHITE);pad(bottom,20,12,20,12);View line=new View(this);line.setBackgroundColor(LINE);if(!dailyMode)bottom.addView(line,new LinearLayout.LayoutParams(-1,dp(1)));
+        TextView add=primaryButton(dailyMode?"＋  记一笔":walletMode?"＋  添加余额账户":"＋  添加订阅");LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,dp(54));ap.topMargin=dp(dailyMode?0:12);bottom.addView(add,ap);add.setOnClickListener(v->{if(dailyMode){LedgerEntry entry=new LedgerEntry();entry.date=LocalDate.now().toString();entry.channel="手动";ledger.edit(entry,false,()->render());}else if(walletMode)walletForm(null,-1);else form(null,-1);});root.addView(bottom);
     }
-    TextView tab(String label,boolean selected){TextView t=text(label,14,selected?WHITE:(darkMode?0xffc6cbd1:0xff555b60),true);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,selected?BLACK:SURFACE,14,0));t.setFocusable(true);return t;}
+    TextView tab(String label,boolean selected){TextView t=text(label,14,selected?BLUE:GRAY,selected);t.setGravity(Gravity.CENTER);t.setBackground(UiKit.surface(this,selected?UiKit.TINT:WHITE,12,0));t.setFocusable(true);return t;}
     int heroColor(){return darkMode?0xff24282d:UiKit.INK;}
     int heroText(){return Color.WHITE;}
     int heroMuted(){return darkMode?0xffaeb5bd:0xffd0d2d4;}
